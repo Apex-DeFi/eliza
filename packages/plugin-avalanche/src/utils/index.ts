@@ -8,7 +8,7 @@ import {
     parseUnits,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { avalanche } from "viem/chains";
+import { avalanche, avalancheFuji } from "viem/chains";
 import { YakSwapQuote } from "../types";
 import { YAK_SWAP_CONFIG } from "./constants";
 
@@ -21,7 +21,7 @@ export const getAccount = (runtime: IAgentRuntime) => {
 
 export const getPublicClient = (_runtime: IAgentRuntime) => {
     return createPublicClient({
-        chain: avalanche,
+        chain: avalancheFuji,
         transport: http(),
     });
 };
@@ -29,7 +29,7 @@ export const getPublicClient = (_runtime: IAgentRuntime) => {
 export const getWalletClient = (runtime: IAgentRuntime) => {
     return createWalletClient({
         account: getAccount(runtime),
-        chain: avalanche,
+        chain: avalancheFuji,
         transport: http(),
     });
 };

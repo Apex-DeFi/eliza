@@ -1,4 +1,5 @@
 import { Address } from "viem";
+import { BurstDEXs } from "./enums";
 
 interface YakSwapQuote {
     amounts: bigint[];
@@ -32,4 +33,10 @@ interface TokenMillMarketCreationParameters {
     args: string;
 }
 
-export type { YakSwapQuote, TokenMillMarketCreationParameters };
+interface DexAllocation {
+    dex: BurstDEXs; // DEX enum value
+    isReward: boolean; // Whether this DEX gets rewards
+    allocation: number; // Allocation in basis points (e.g., 2500 for 25%)
+}
+
+export type { YakSwapQuote, TokenMillMarketCreationParameters, DexAllocation };

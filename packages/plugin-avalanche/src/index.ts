@@ -3,6 +3,7 @@ import tokenMillCreate from "./actions/tokenMillCreate";
 import transfer from "./actions/transfer";
 import yakSwap from "./actions/yakSwap";
 import yakStrategy from "./actions/yakStrategy";
+import apexBurstToken from "./actions/apexBurstToken";
 import { tokensProvider } from "./providers/tokens";
 import { strategiesProvider } from "./providers/strategies";
 import { walletProvider } from "./providers/wallet";
@@ -11,6 +12,7 @@ import {
     STRATEGY_ADDRESSES,
     YAK_SWAP_CONFIG,
     TOKEN_MILL_CONFIG,
+    APEX_CONFIG,
 } from "./utils/constants";
 
 export const PROVIDER_CONFIG = {
@@ -18,12 +20,13 @@ export const PROVIDER_CONFIG = {
     STRATEGY_ADDRESSES: STRATEGY_ADDRESSES,
     YAK_SWAP_CONFIG: YAK_SWAP_CONFIG,
     TOKEN_MILL_CONFIG: TOKEN_MILL_CONFIG,
+    APEX_CONFIG: APEX_CONFIG,
 };
 
 export const avalanchePlugin: Plugin = {
     name: "avalanche",
     description: "Avalanche Plugin for Eliza",
-    actions: [transfer, yakSwap, yakStrategy, tokenMillCreate],
+    actions: [transfer, yakSwap, yakStrategy, tokenMillCreate, apexBurstToken],
     evaluators: [],
     providers: [tokensProvider, strategiesProvider, walletProvider],
 };

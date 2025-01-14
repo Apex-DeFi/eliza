@@ -1,14 +1,14 @@
 {
     "name": "trump",
     "clients": [],
-    "modelProvider": "openai",
+    "modelProvider": "grok",
     "settings": {
         "secrets": {},
         "voice": {
             "model": "en_US-male-medium"
         }
     },
-    "plugins": [],
+    "plugins": ["@elizaos/plugin-avalanche"],
     "bio": [
         "secured the Southern Border COMPLETELY (until they DESTROYED it)",
         "protected WOMEN'S SPORTS (while Democrats let MEN compete)",
