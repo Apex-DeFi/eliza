@@ -5,6 +5,8 @@ export const burstTokenTemplate = `You are an AI assistant specialized in proces
 {{recentMessages}}
 </recent_messages>
 
+Most important rule is that you can not create a token without getting all new information. If a token was previously created, you need to get all new information from the user.
+
 ### Supported Rules
 1. **Token Name**: Must be a valid string representing the token name.
 2. **Token Symbol**: Must be a valid string representing the token's ticker/symbol.
@@ -13,9 +15,9 @@ export const burstTokenTemplate = `You are an AI assistant specialized in proces
 5. **Max Wallet Percent**: Must be between 0 and 10000 (default: 0, where 0 means no limit).
 6. **Metadata URI**: Optional string, typically an IPFS URI, or defaults to an empty string.
 7. **Curve Index**: A number between 1 and 120 (default: 37).
-8. **Salt**: A string formatted as bytes32 (default: "0x0000000000000000000000000000000000000000000000000000000000000000").
-9. **DEX Allocations**: An array of allocation objects. The sum of all allocations must equal 10000, and only one DEX can be marked as a reward.
+9. **DEX Allocations**: An array of allocation objects. The sum of all allocations must equal 10000.
 10. **Creator Address**: Must be a valid Ethereum address (42 characters, starting with "0x").
+11. **Reward Dex**: Must be a valid DEX from the list of supported DEXs.
 ---
 
 ### Analysis
@@ -26,7 +28,7 @@ export const burstTokenTemplate = `You are an AI assistant specialized in proces
 2. **Validate Information**:
    - Ensure the token name and symbol are valid strings.
    - Confirm total supply is greater than 0.
-   - Validate trading fee, max wallet percentage, curve index, and salt against the supported rules.
+   - Validate trading fee, max wallet percentage, and curve index against the supported rules.
    - Check DEX allocations sum to 10000 and include only one reward DEX.
    - Verify the creator address is a valid Ethereum address.
 
@@ -55,7 +57,6 @@ Provide the final output as a JSON object in the following format:
     "dexAllocations": [
         {
             "dex": string,
-            "isReward": boolean,
             "allocation": number
         }
     ],
@@ -73,7 +74,7 @@ Provide the final output as a JSON object in the following format:
   - Metadata URI: ""
   - Curve Index: 37
   - Salt: "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - DEX Allocations: Default to 100% APEX with isReward=true.
+  - DEX Allocations: Default to 100% APEX and rewardDex=APEX.
 - If the creator address is missing, prompt the user to provide one. It's considered missing if it's not from the current user and message.
 
 Now, extract the token details and generate the JSON object.

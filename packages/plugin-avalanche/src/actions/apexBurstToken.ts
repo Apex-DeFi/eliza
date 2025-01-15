@@ -2,7 +2,7 @@ import {
     Action,
     ActionExample,
     IAgentRuntime,
-    Memory,
+    type Memory,
     State,
     HandlerCallback,
     elizaLogger,
@@ -17,6 +17,7 @@ import { createApexBurstToken } from "../utils/apexBurst";
 import { isAddress } from "viem";
 import { burstTokenTemplate } from "../templates/apex";
 import { burstSchema } from "../types/apexSchemas";
+import { BurstDEXs } from "../types/enums";
 
 export interface ApexBurstTokenContent extends Content {
     name: string;
@@ -28,6 +29,7 @@ export interface ApexBurstTokenContent extends Content {
     curveIndex: number;
     salt: string;
     dexAllocations: DexAllocation[];
+    rewardDex: BurstDEXs;
     creator: string;
 }
 
@@ -86,7 +88,12 @@ export default {
         _options: { [key: string]: unknown },
         callback?: HandlerCallback
     ) => {
-        elizaLogger.log("Starting CREATE_TOKEN handler...");
+        elizaLogger.log("Starting BURST_TOKEN handler...");
+        callback?.({
+            text: "🔄 Creating Apex Burst token...",
+            action: "BURST_TOKEN",
+            type: "processing",
+        });
 
         // Initialize or update state
         if (!state) {
@@ -129,6 +136,7 @@ export default {
                     "25% to APEX, 25% to JOE, 25% to PANGOLIN, 25% to PHARAOH\r\n" +
                     "reward: APEX",
                 content: { error: "Invalid content" },
+                action: "CONTINUE",
             });
             return false;
         }
@@ -147,30 +155,30 @@ export default {
             callback?.({
                 text: "Dex allocations are missing or invalid.",
                 content: { error: "Invalid dex allocations" },
+                action: "CONTINUE",
             });
             return false;
         }
 
-        // Verify DEX allocations and sum to 10000. Only 1 dex can be marked as a reward. Default DEX allocation is APEX 100% and isReward true.
+        // Verify DEX allocations and sum to 10000. Only 1 dex can be marked as a reward. Default DEX allocation is APEX 100%.
         let totalAllocation = 0;
-        let rewardCount = 0;
         for (let i = 0; i < content.dexAllocations.length; i++) {
             totalAllocation += content.dexAllocations[i].allocation;
-            if (content.dexAllocations[i].isReward === true) {
-                rewardCount++;
-            }
         }
         if (totalAllocation !== 10000) {
             callback?.({
                 text: "Dex allocations must sum to 10000",
                 content: { error: "Invalid dex allocations" },
+                action: "CONTINUE",
             });
             return false;
         }
-        if (rewardCount !== 1) {
+        // make sure rewardDex is set
+        if (!content.rewardDex) {
             callback?.({
-                text: "Only 1 dex can be marked as a reward",
-                content: { error: "Invalid dex allocations" },
+                text: "Reward dex is not set",
+                content: { error: "Invalid reward dex" },
+                action: "CONTINUE",
             });
             return false;
         }
@@ -186,15 +194,33 @@ export default {
             content.curveIndex,
             content.salt,
             content.dexAllocations,
+            content.rewardDex,
             content.creator as `0x${string}`
         );
 
         const messageText = `Created token for ${content.creator} ${content.name} with symbol ${content.symbol}. CA: ${tokenAddress}`;
 
+        // // Store the token creation as a memory, this way the same token won't be created again
+        // const tokenMemory: Memory = {
+        //     userId: message.agentId,
+        //     agentId: message.agentId,
+        //     content: {
+        //         text: `Created token at ${tokenAddress}`,
+        //         tx,
+        //         tokenAddress,
+        //     },
+        //     roomId: message.roomId,
+        //     createdAt: Date.now(),
+        // };
+
+        // const memoryManager = runtime.getMemoryManager("apex_burst_tokens");
+        // await memoryManager.createMemory(tokenMemory);
+
         callback?.({
             text: messageText,
             content: { tx, tokenAddress },
         });
+
         return true;
     },
     examples: [
@@ -214,9 +240,8 @@ export default {
                     totalSupply: "1000000000",
                     tradingFee: 0,
                     maxWalletPercent: 0,
-                    dexAllocations: [
-                        { dex: "APEX", isReward: true, allocation: 10000 },
-                    ],
+                    dexAllocations: [{ dex: "APEX", allocation: 10000 }],
+                    rewardDex: "APEX",
                 },
             },
         ],
@@ -237,11 +262,12 @@ export default {
                     tradingFee: 200,
                     maxWalletPercent: 5000,
                     dexAllocations: [
-                        { dex: "APEX", isReward: true, allocation: 5000 },
-                        { dex: "JOE", isReward: false, allocation: 2500 },
-                        { dex: "PHARAOH", isReward: false, allocation: 2500 },
-                        { dex: "PANGOLIN", isReward: false, allocation: 2500 },
+                        { dex: "APEX", allocation: 5000 },
+                        { dex: "JOE", allocation: 2500 },
+                        { dex: "PHARAOH", allocation: 2500 },
+                        { dex: "PANGOLIN", allocation: 2500 },
                     ],
+                    rewardDex: "APEX",
                 },
             },
         ],

@@ -4,6 +4,7 @@ import { IAgentRuntime, elizaLogger } from "@elizaos/core";
 import { DexAllocation } from "../types";
 import { Address, isHex, parseEther, parseEventLogs, zeroAddress } from "viem";
 import { burstFactoryAbi } from "../abi";
+import { BurstDEXs } from "../types/enums";
 
 export const createApexBurstToken = async (
     runtime: IAgentRuntime,
@@ -16,6 +17,7 @@ export const createApexBurstToken = async (
     curveIndex: number,
     salt: string,
     dexAllocations: DexAllocation[],
+    rewardDex: BurstDEXs,
     creator: Address
 ) => {
     const account = getAccount(runtime);
@@ -69,24 +71,19 @@ export const createApexBurstToken = async (
         throw new Error("Dex allocations must be provided");
     } else {
         let totalAllocation = 0;
-        let rewardCount = 0;
         for (let i = 0; i < dexAllocations.length; i++) {
             totalAllocation += dexAllocations[i].allocation;
-            if (dexAllocations[i].isReward === true) {
-                rewardCount++;
-            }
         }
         if (totalAllocation !== 10000) {
             throw new Error("Dex allocations must sum to 10000");
         }
-        if (rewardCount !== 1) {
-            throw new Error("Only 1 dex can be marked as a reward");
-        }
     }
+
+    // get the reward dex
 
     const dexAllocationParams = dexAllocations.map((alloc) => ({
         dex: alloc.dex,
-        isReward: alloc.isReward,
+        isReward: alloc.dex === rewardDex,
         allocation: BigInt(alloc.allocation),
     }));
 

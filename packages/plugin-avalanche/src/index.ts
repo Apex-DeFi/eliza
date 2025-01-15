@@ -1,9 +1,7 @@
 import { Plugin } from "@elizaos/core";
-import tokenMillCreate from "./actions/tokenMillCreate";
 import transfer from "./actions/transfer";
 import yakSwap from "./actions/yakSwap";
 import yakStrategy from "./actions/yakStrategy";
-import apexBurstToken from "./actions/apexBurstToken";
 import { tokensProvider } from "./providers/tokens";
 import { strategiesProvider } from "./providers/strategies";
 import { walletProvider } from "./providers/wallet";
@@ -14,6 +12,8 @@ import {
     TOKEN_MILL_CONFIG,
     APEX_CONFIG,
 } from "./utils/constants";
+import { burstTokenDataEvaluator } from "./evaluators/apexCreateBurstToken";
+import { apexCreateBurstTokenProvider } from "./providers/apexCreateBurstToken";
 
 export const PROVIDER_CONFIG = {
     TOKEN_ADDRESSES: TOKEN_ADDRESSES,
@@ -26,9 +26,14 @@ export const PROVIDER_CONFIG = {
 export const avalanchePlugin: Plugin = {
     name: "avalanche",
     description: "Avalanche Plugin for Eliza",
-    actions: [transfer, yakSwap, yakStrategy, tokenMillCreate, apexBurstToken],
-    evaluators: [],
-    providers: [tokensProvider, strategiesProvider, walletProvider],
+    actions: [transfer, yakSwap, yakStrategy],
+    evaluators: [burstTokenDataEvaluator],
+    providers: [
+        tokensProvider,
+        strategiesProvider,
+        walletProvider,
+        apexCreateBurstTokenProvider,
+    ],
 };
 
 export default avalanchePlugin;

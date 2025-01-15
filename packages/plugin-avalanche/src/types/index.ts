@@ -35,7 +35,6 @@ interface TokenMillMarketCreationParameters {
 
 interface DexAllocation {
     dex: BurstDEXs; // DEX enum value
-    isReward: boolean; // Whether this DEX gets rewards
     allocation: number; // Allocation in basis points (e.g., 2500 for 25%)
 }
 
