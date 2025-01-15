@@ -33,9 +33,18 @@ export const burstTokenDataEvaluator: Evaluator = {
         "GET_BURST_TOKEN_DATA",
         "BURST_TOKEN_DETAILS",
         "BURST_TOKEN_DATA",
+        "MAKE_BURST_TOKEN",
+        "MAKE_BURST_TOKEN_DATA",
+        "MAKE_TOKEN_DATA",
+        "MAKE_TOKEN_DETAILS",
+        "LAUNCH_BURST_TOKEN",
+        "LAUNCH_BURST_TOKEN_DATA",
+        "LAUNCH_TOKEN_DATA",
+        "LAUNCH_TOKEN_DETAILS",
     ],
+    alwaysRun: true,
     description:
-        "Extract the burst token data (name, symbol, decimals, total supply, dex allocations etc.) from the user's messages when the user is trying to create a burst token and it's clearly stated.",
+        "Extract the burst token data (name, symbol, decimals, total supply, dex allocations etc.) from the user's messages when the user is trying to create a token and it's clearly stated.",
     validate: async (runtime: IAgentRuntime, message: Memory) => {
         try {
             const cacheKey = getBurstTokenDataCacheKey(runtime, message.userId);
@@ -44,16 +53,9 @@ export const burstTokenDataEvaluator: Evaluator = {
                     cacheKey
                 )) || { ...emptyCreateBurstTokenData };
 
-            // Check if the message indicates token creation intent
-            const tokenCreationIntent = /token|burst|create|launch/i.test(
-                message.content.text
-            );
-
-            // Run if there's creation intent OR incomplete data
+            // Run if the data is incomplete and the user hasn't confirmed the creation
             return (
-                tokenCreationIntent ||
-                !isDataComplete(cachedData) ||
-                !cachedData.isBurstTokenCreated
+                !isDataComplete(cachedData) && !cachedData.isBurstTokenCreated
             );
         } catch (error) {
             elizaLogger.error(
@@ -78,7 +80,7 @@ export const burstTokenDataEvaluator: Evaluator = {
 
             const burstTokenDataExtractionTemplate = `
 Analyze the following conversation and extract the token details.
-Only extract information (name, symbol, totalSupply, tradingFee, maxWalletPercent, metadataURI, curveIndex, dexAllocations, creator) when it is explicitly and clearly stated by the user about a token they want to create.
+Only extract information (name, symbol, totalSupply, tradingFee, maxWalletPercent, logo, banner, sound, burst amount, dex allocations, creator) when it is explicitly and clearly stated by the user about a token they want to create.
 
 Conversation:
 ${message.content.text}
@@ -90,9 +92,9 @@ Return a JSON object containing only the fields where information was clearly fo
     "name": "string",
     "symbol": string,
     "totalSupply": number,
-    "imageURI": string,
-    "bannerURI": string,
-    "swapSoundURI": string,
+    "image": string,
+    "banner": string,
+    "swapSound": string,
     "description": string,
     "tradingFee": number,
     "maxWalletPercent": number,
@@ -133,7 +135,7 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 extractedInfo,
             });
 
-            // Update only undefined fields with new data
+            // Update all fields with new data
             Object.entries(extractedInfo).forEach(([field, value]) => {
                 // Skip internal fields that shouldn't be copied
                 if (
@@ -188,9 +190,9 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 "name": "Apex Rewards",
                 "symbol": "APR",
                 "totalSupply": 1000000,
-                "imageURI": "ipfs://Qm...",
-                "bannerURI": "ipfs://Qm...",
-                "swapSoundURI": "ipfs://Qm...",
+                "image": "ipfs://Qm...",
+                "banner": "ipfs://Qm...",
+                "swapSound": "ipfs://Qm...",
                 "description": "First community-driven rewards token on Apex",
                 "tradingFee": 250,
                 "maxWalletPercent": 500,
@@ -215,13 +217,13 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "I'm thinking of launching a token called CryptoKitties with 2% trading fee. Not sure about other details yet but the symbol will be KITY",
+                        text: "I'm thinking of launching a token called Sharky with 2% trading fee. Not sure about other details yet but the symbol will be SHARK",
                     },
                 },
             ],
             outcome: `{
-                "name": "CryptoKitties",
-                "symbol": "KITY",
+                "name": "Sharky",
+                "symbol": "SHARK",
                 "tradingFee": 200
             }`,
         },
@@ -290,8 +292,8 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 },
             ],
             outcome: `{
-                "name": "MetaVerse Explorer",
-                "symbol": "MVE",
+                "name": "Shark Waters",
+                "symbol": "SHARK",
                 "maxWalletPercent": 300,
                 "website": "meta-explorer.io",
                 "dexAllocations": [
@@ -317,9 +319,9 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 "symbol": "GFH",
                 "tradingFee": 250,
                 "maxWalletPercent": 425,
-                "bannerURI": "ipfs://Qm...",
-                "imageURI": "ipfs://Qm...",
-                "swapSoundURI": "ipfs://Qm...",
+                "banner": "ipfs://Qm...",
+                "image": "ipfs://Qm...",
+                "swapSound": "ipfs://Qm...",
                 "description": "GameFi Hub is the ultimate gaming token",
                 "twitter": "@gamefihub",
                 "telegram": "@gfhub",
@@ -358,9 +360,9 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 "symbol": "DDRG",
                 "tradingFee": 300,
                 "maxWalletPercent": 250,
-                "bannerURI": "https://imgur.com/a/ABC123",
-                "imageURI": "https://i.imgur.com/XYZ789.png",
-                "swapSoundURI": "https://direct.link/sound.mp3",
+                "banner": "https://imgur.com/a/ABC123",
+                "image": "https://i.imgur.com/XYZ789.png",
+                "swapSound": "https://direct.link/sound.mp3",
                 "dexAllocations": [
                     { "dex": "APEX", "allocation": 6000 },
                     { "dex": "JOE", "allocation": 2000 },
@@ -401,9 +403,9 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 "symbol": "PUNK",
                 "tradingFee": 200,
                 "maxWalletPercent": 300,
-                "bannerURI": "agent-storage://banner-123.png",
-                "imageURI": "agent-storage://logo-456.png",
-                "swapSoundURI": "agent-storage://swap-789.mp3",
+                "banner": "agent-storage://banner-123.png",
+                "image": "agent-storage://logo-456.png",
+                "swapSound": "agent-storage://swap-789.mp3",
                 "dexAllocations": [
                     { "dex": "APEX", "allocation": 4000 },
                     { "dex": "JOE", "allocation": 3000 },
@@ -439,9 +441,9 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 "symbol": "MWAR",
                 "tradingFee": 250,
                 "maxWalletPercent": 400,
-                "bannerURI": "https://imgur.com/a/DEF456",
-                "imageURI": "agent-storage://logo-789.png",
-                "swapSoundURI": "agent-storage://swap-101.mp3",
+                "banner": "https://imgur.com/a/DEF456",
+                "image": "agent-storage://logo-789.png",
+                "swapSound": "agent-storage://swap-101.mp3",
                 "dexAllocations": [
                     { "dex": "APEX", "allocation": 4500 },
                     { "dex": "JOE", "allocation": 3000 },

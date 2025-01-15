@@ -41,7 +41,7 @@ export const apexCreateBurstTokenProvider: Provider = {
     get: async (runtime: IAgentRuntime, message: Memory) => {
         try {
             const cacheKey = getBurstTokenDataCacheKey(runtime, message.userId);
-            elizaLogger.info("Getting burst token data for user", {
+            elizaLogger.info("[Provider] Getting burst token data for user", {
                 cacheKey,
                 message,
             });
@@ -50,7 +50,7 @@ export const apexCreateBurstTokenProvider: Provider = {
                     cacheKey
                 )) || { ...emptyCreateBurstTokenData };
 
-            elizaLogger.info("Burst token data", {
+            elizaLogger.info("[Provider] Cached data", {
                 cachedData,
             });
 
@@ -82,7 +82,15 @@ export const apexCreateBurstTokenProvider: Provider = {
                 response += "\n\n";
             }
 
+            elizaLogger.info("[Provider] Known fields", {
+                knownFields,
+            });
+
             const missingFields = getMissingFields(cachedData);
+
+            elizaLogger.info("[Provider] Missing fields", {
+                missingFields,
+            });
 
             if (missingFields.length > 0) {
                 // First, provide a clear, concise bulleted list of all missing fields

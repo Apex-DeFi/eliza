@@ -92,9 +92,9 @@ export const burstTokenSchema = z.object({
         .number()
         .optional()
         .describe("The total supply of the token"),
-    imageURI: z.string().optional().describe("The image URI of the token"),
-    bannerURI: z.string().optional().describe("The banner URI of the token"),
-    swapSoundURI: z
+    image: z.string().optional().describe("The image URI of the token"),
+    banner: z.string().optional().describe("The banner URI of the token"),
+    swapSound: z
         .string()
         .optional()
         .describe("The swap sound URI of the token"),
