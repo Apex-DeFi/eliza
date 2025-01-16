@@ -9,6 +9,8 @@ import {
 import {
     emptyCreateBurstTokenData,
     ApexCreateBurstTokenData,
+    ApexBurstInternalFields,
+    ApexBurstInternalField,
 } from "../types/apex";
 import {
     getBurstTokenDataCacheKey,
@@ -58,9 +60,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 )) || { ...emptyCreateBurstTokenData };
 
             // Run if the data is incomplete and the user hasn't confirmed the creation
-            return (
-                !isDataComplete(cachedData) && !cachedData.isBurstTokenCreated
-            );
+            return !isDataComplete(cachedData) && !cachedData.isConfirmed;
         } catch (error) {
             elizaLogger.error(
                 `Error in apexGetBurstTokenDataEvaluator: ${error.message}`
@@ -84,6 +84,9 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
             const burstTokenDataExtractionTemplate = `
 Analyze the following conversation and extract the token details.
 Only extract information (name, symbol, totalSupply, tradingFee, maxWalletPercent, logo, banner, sound, burst amount, dex allocations, creator) when it is explicitly and clearly stated by the user about a token they want to create.
+
+IMPORTANT: If the user indicates they don't want to add any more information (e.g., "no more", "no extras", "skip", "no thanks", etc.) or they are confirming or cancelling the token creation (e.g., "yes", "confirm", "launch", "create", "let's do it", "I'm ready", "make it happen", "let's launch!", "proceed"),
+return an empty object {}. Do not fill in example values.
 
 Conversation:
 ${message.content.text}
@@ -113,19 +116,20 @@ Return a JSON object containing only the fields where information was clearly fo
     "website": string,
     "twitter": string,
     "telegram": string,
-    "discord": string,
-    "isConfirmed": boolean
+    "discord": string
 }
 \`\`\`
 
 Only include fields where the information is explicitly and clearly stated by the user.
 Omit fields if the information is unclear, hypothetical, or not explicitly stated.
+
+If the user is confirming or cancelling the token creation, return an empty object {}.
 `;
 
             const generatedContent = await generateObject({
                 runtime,
                 context: burstTokenDataExtractionTemplate,
-                modelClass: ModelClass.LARGE,
+                modelClass: ModelClass.SMALL,
                 schema: burstTokenSchema,
                 mode: "auto",
             });
@@ -143,8 +147,7 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
             Object.entries(extractedInfo).forEach(([field, value]) => {
                 // Skip internal fields that shouldn't be copied
                 if (
-                    field === "isBurstTokenCreated" ||
-                    field === "lastUpdated"
+                    ApexBurstInternalFields.has(field as ApexBurstInternalField)
                 ) {
                     return;
                 }
@@ -168,10 +171,6 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
             elizaLogger.log("Evaluator updated cached data", {
                 cachedData,
             });
-
-            if (isDataComplete(cachedData)) {
-                elizaLogger.log("Data is complete, creating burst token...");
-            }
         } catch (error) {
             elizaLogger.error(
                 `Error in apexGetBurstTokenDataEvaluator: ${error.message}`
@@ -185,7 +184,7 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "I want to create a token called Apex Rewards with symbol APR. Total supply should be 1000000 tokens. Set trading fee to 2.5%, max wallet to 5%. Allocate 60% to APEX as reward pool, 20% to JOE, and 20% to PHARAOH. Burst amount is 100000. Website is apexrewards.io, Twitter @apexrewards, Telegram @apexrewards_tg, Discord apexrewards. Here's my creator address: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e. Description: First community-driven rewards token on Apex. Image URI: ipfs://Qm..., Banner URI: ipfs://Qm..., Swap sound: ipfs://Qm...",
+                        text: "I want to create a token called Apex Rewards with symbol APR. Total supply should be 1000000 tokens. Set trading fee to 2.5%, max wallet to 5%. Allocate 60% to APEX as reward pool, 20% to JOE, and 20% to PHARAOH. Burst amount is 325. Website is apexrewards.io, Twitter @apexrewards, Telegram @apexrewards_tg, Discord apexrewards. Here's my creator address: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e. Description: First community-driven rewards token on Apex. Image URI: ipfs://Qm..., Banner URI: ipfs://Qm..., Swap sound: ipfs://Qm...",
                     },
                 },
             ],
@@ -199,7 +198,7 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 "description": "First community-driven rewards token on Apex",
                 "tradingFee": 250,
                 "maxWalletPercent": 500,
-                "burstAmount": 100000,
+                "burstAmount": 325,
                 "dexAllocations": [
                     { "dex": "APEX", "allocation": 6000 },
                     { "dex": "JOE", "allocation": 2000 },
@@ -220,14 +219,15 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "I'm thinking of launching a token called Sharky with 2% trading fee. Not sure about other details yet but the symbol will be SHARK",
+                        text: "I'm thinking of launching a token called Sharky with 2% trading fee. Not sure about other details yet but the symbol will be SHARK. Amount is 115.",
                     },
                 },
             ],
             outcome: `{
                 "name": "Sharky",
                 "symbol": "SHARK",
-                "tradingFee": 200
+                "tradingFee": 200,
+                "burstAmount": 115
             }`,
         },
         {
@@ -537,6 +537,54 @@ Omit fields if the information is unclear, hypothetical, or not explicitly state
                 ],
                 "rewardDex": "JOE"
             }`,
+        },
+        {
+            context: "User indicates no additional fields",
+            messages: [
+                {
+                    user: "{{user1}}",
+                    content: {
+                        text: "no other extras",
+                    },
+                },
+            ],
+            outcome: `{}`, // Empty object - no changes
+        },
+        {
+            context: "User declines optional fields",
+            messages: [
+                {
+                    user: "{{user1}}",
+                    content: {
+                        text: "skip the rest",
+                    },
+                },
+            ],
+            outcome: `{}`,
+        },
+        {
+            context: "User wants to proceed without optional fields",
+            messages: [
+                {
+                    user: "{{user1}}",
+                    content: {
+                        text: "that's all I want to add",
+                    },
+                },
+            ],
+            outcome: `{}`,
+        },
+        {
+            context: "User explicitly skips optional fields",
+            messages: [
+                {
+                    user: "{{user1}}",
+                    content: {
+                        text: "no optional features needed",
+                    },
+                },
+            ],
+            outcome: `{}`,
         },
     ] as EvaluationExample[],
 };

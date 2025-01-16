@@ -13,6 +13,7 @@ import {
     emptyCreateBurstTokenData,
 } from "../types/apex";
 import { z } from "zod";
+// import { createApexBurstToken } from "../utils/apexBurst";
 
 const canBeConfirmed = (data: ApexCreateBurstTokenData) => {
     const totalAllocation = data.dexAllocations?.reduce(
@@ -39,21 +40,15 @@ const canBeConfirmed = (data: ApexCreateBurstTokenData) => {
     return false;
 };
 
-export const apexCreateBurstTokenEvaluator: Evaluator = {
-    name: "CREATE_BURST_TOKEN",
-    similes: [
-        "MAKE_BURST_TOKEN",
-        "CONFIRM_BURST_TOKEN",
-        "LAUNCH_BURST_TOKEN",
-        "DEPLOY_BURST_TOKEN",
-        "CREATE_TOKEN",
-    ],
+export const apexConfirmBurstTokenEvaluator: Evaluator = {
+    name: "CONFIRM_BURST_TOKEN",
+    similes: ["CONFIRM_DETAILS", "CONFIRM_TOKEN", "CONFIRM_TOKEN_DATA"],
     description: `
         Evaluates user responses for token creation confirmation or cancellation.
         Triggers when all token data is collected and waiting for final user approval.
         Handles both explicit (yes/no) and implicit ("let's launch it") confirmations.
         The user response can be:
-        - Confirmation: "yes", "confirm", "launch", "create", "let's do it", "I'm ready", "make it happen", "let's launch!"
+        - Confirmation: "yes", "confirm", "launch", "create", "let's do it", "I'm ready", "make it happen", "let's launch!", "proceed"
         - Cancellation: "no", "cancel", "stop", "wait", "not yet", "maybe later", "let me think"
     `,
     alwaysRun: true,
@@ -66,9 +61,7 @@ export const apexCreateBurstTokenEvaluator: Evaluator = {
                 )) || { ...emptyCreateBurstTokenData };
 
             // Run if the data is complete and the token hasn't been created
-            return (
-                canBeConfirmed(cachedData) && !cachedData.isBurstTokenCreated
-            );
+            return canBeConfirmed(cachedData);
         } catch (error) {
             elizaLogger.error(
                 `Error in apexCreateBurstTokenEvaluator: ${error.message}`
@@ -91,12 +84,12 @@ Analyze if the user is confirming or cancelling a token creation.
 
 Confirmation indicators:
     - Explicit: "yes", "confirm", "launch", "create"
-    - Implicit: "let's do it", "looks good", "ready to go"
-    - Enthusiastic: "let's launch!", "can't wait"
+    - Implicit: "lets do it", "looks good", "ready to go"
+    - Enthusiastic: "lets launch", "lets go"
 
 Cancellation indicators:
     - Explicit: "no", "cancel", "stop"
-    - Implicit: "need more time", "not sure", "wait"
+    - Implicit: "need time", "not sure", "wait"
     - Hesitant: "maybe later", "let me think"
 
 Conversation:
@@ -108,45 +101,56 @@ Return a JSON object with isConfirmed field set to true or false based on the an
 {
     "isConfirmed": boolean
 }
-\`\`\``;
+\`\`\`
+`;
 
-            elizaLogger.info(
-                "[CreateBurstTokenEvaluator] cachedData",
-                cachedData
-            );
+            elizaLogger.info("[CONFIRM_BURST_TOKEN] cachedData", cachedData);
 
             const result = await generateObject({
                 runtime,
                 context: confirmationTemplate,
                 modelClass: ModelClass.SMALL,
                 schema: z.object({
-                    isConfirmed: z.boolean(),
+                    isConfirmed: z
+                        .boolean()
+                        .optional()
+                        .describe(
+                            "true if the user is confirming the token creation, false if they are cancelling"
+                        ),
                 }),
                 mode: "auto",
             });
 
             elizaLogger.info(
-                "[CreateBurstTokenEvaluator] result",
+                "[CONFIRM_BURST_TOKEN] result",
                 result.object || "No result"
             );
 
             // Update cache with confirmation status
-            if (result.object) {
+            if (result.object && result.object["isConfirmed"] !== undefined) {
+                const userConfirmed = result.object["isConfirmed"];
                 // update the cached data with the new confirmation status
-                cachedData.isConfirmed = result.object["isConfirmed"];
+                cachedData.isConfirmed = userConfirmed;
                 cachedData.lastUpdated = Date.now();
                 await runtime.cacheManager.set(cacheKey, cachedData, {
                     expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
                 });
 
                 elizaLogger.info(
-                    `[CreateBurstTokenEvaluator] cachedData after update set isConfirmed to ${cachedData.isConfirmed}`,
+                    `[CONFIRM_BURST_TOKEN] cachedData after update set isConfirmed to ${cachedData.isConfirmed}`,
                     cachedData
                 );
+                if (!userConfirmed) {
+                    elizaLogger.info(
+                        "[CONFIRM_BURST_TOKEN] user cancelled token creation"
+                    );
+                    // User cancelled the token creation, clear the cached data
+                    await runtime.cacheManager.delete(cacheKey);
+                }
             }
         } catch (error) {
             elizaLogger.error(
-                "Error in createBurstTokenEvaluator handler:",
+                "Error in apexConfirmBurstTokenEvaluator handler:",
                 error
             );
         }
@@ -186,7 +190,7 @@ Return a JSON object with isConfirmed field set to true or false based on the an
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "Let's launch this token! 🚀",
+                        text: "Let's launch this token!",
                     },
                 },
             ],

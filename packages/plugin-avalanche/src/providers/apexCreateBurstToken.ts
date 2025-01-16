@@ -10,6 +10,8 @@ import {
     ApexCreateBurstTokenData,
     BURST_TOKEN_FIELD_GUIDANCE,
     emptyCreateBurstTokenData,
+    ApexBurstInternalFields,
+    ApexBurstInternalField,
 } from "../types/apex";
 
 export const getBurstTokenDataCacheKey = (
@@ -21,15 +23,13 @@ export const getBurstTokenDataCacheKey = (
 
 export const getMissingRequiredFields = (
     cachedData: ApexCreateBurstTokenData
-): Array<
-    keyof Omit<ApexCreateBurstTokenData, "isBurstTokenCreated" | "lastUpdated">
-> => {
+): Array<keyof Omit<ApexCreateBurstTokenData, ApexBurstInternalField>> => {
     return ApexBurstRequiredFields.filter(
         (field) =>
             !cachedData[
                 field as keyof Omit<
                     ApexCreateBurstTokenData,
-                    "isBurstTokenCreated" | "lastUpdated"
+                    ApexBurstInternalField
                 >
             ]
     );
@@ -37,15 +37,13 @@ export const getMissingRequiredFields = (
 
 export const getMissingOptionalFields = (
     cachedData: ApexCreateBurstTokenData
-): Array<
-    keyof Omit<ApexCreateBurstTokenData, "isBurstTokenCreated" | "lastUpdated">
-> => {
+): Array<keyof Omit<ApexCreateBurstTokenData, ApexBurstInternalField>> => {
     return ApexBurstOptionalFields.filter(
         (field) =>
             !cachedData[
                 field as keyof Omit<
                     ApexCreateBurstTokenData,
-                    "isBurstTokenCreated" | "lastUpdated"
+                    ApexBurstInternalField
                 >
             ]
     );
@@ -68,20 +66,15 @@ export const apexCreateBurstTokenProvider: Provider = {
                 cachedData,
             });
 
-            if (cachedData.isBurstTokenCreated) {
-                // if the token has been created, let the user know
-                return `${cachedData.name} has already been created!`;
-            }
-
             let response = "Create Burst Token Status:\n\n";
 
             // Show current information if any exists
             const knownFields = Object.entries(cachedData)
                 .filter(
                     ([key, value]) =>
-                        key !== "isBurstTokenCreated" &&
-                        key !== "lastUpdated" &&
-                        value !== undefined
+                        !ApexBurstInternalFields.has(
+                            key as ApexBurstInternalField
+                        ) && value !== undefined
                 )
                 .map(([key, value]) => {
                     const fieldName =
@@ -112,8 +105,14 @@ export const apexCreateBurstTokenProvider: Provider = {
                 missingOptionalFields,
             });
 
+            let action = "NONE";
+
             // If there are missing required fields, provide a clear, concise bulleted list of all missing fields
             if (missingRequiredFields.length > 0) {
+                response +=
+                    "CURRENT TASK FOR " +
+                    runtime.character.name +
+                    " IS TO COLLECT THE FOLLOWING INFORMATION.\n\n";
                 response += "Required Information and Instructions:\n\n";
                 missingRequiredFields.forEach((field) => {
                     const fieldGuidance = BURST_TOKEN_FIELD_GUIDANCE[field];
@@ -123,7 +122,7 @@ export const apexCreateBurstTokenProvider: Provider = {
                     response += `- Description: ${fieldGuidance.description}\n`;
                     response += `- Valid Examples: ${fieldGuidance.valid}\n`;
                     response += `- Do Not Include: ${fieldGuidance.invalid}\n`;
-                    response += `- Instructions: ${fieldGuidance.instructions}\n\n`;
+                    response += `- Instructions: ${fieldGuidance.instructions}\n`;
                 });
                 response += "\n";
 
@@ -136,10 +135,11 @@ export const apexCreateBurstTokenProvider: Provider = {
                     response += `- Description: ${fieldGuidance.description}\n`;
                     response += `- Valid Examples: ${fieldGuidance.valid}\n`;
                     response += `- Do Not Include: ${fieldGuidance.invalid}\n`;
-                    response += `- Instructions: ${fieldGuidance.instructions}\n\n`;
+                    response += `- Instructions: ${fieldGuidance.instructions}\n`;
                 });
                 response += "\n";
 
+                // Add clear instructions for the agent
                 // Add clear instructions for the agent
                 response += "Agent Instructions:\n";
                 response +=
@@ -158,22 +158,34 @@ export const apexCreateBurstTokenProvider: Provider = {
                 // All required fields are collected
                 // If the user hasn't confirmed the creation, ask them to review the details and confirm
                 if (!cachedData.isConfirmed) {
+                    // This needs to be more explicit and clear as the agent doesn't always request confirmation
+                    // Especially if the users follow up was to add an optional field
+                    // If we are in this block always ask for confirmation
+                    cachedData.hasRequestedConfirmation = true;
+                    await runtime.cacheManager.set(cacheKey, cachedData, {
+                        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
+                    });
+                    action = "CREATE_BURST_TOKEN";
                     response +=
                         "Status: ✓ All necessary information has been collected.\n";
                     response += "Please review the details carefully!\n";
+                    response += "Rules:\n";
+                    response +=
+                        "1. You must always inform the user they can type 'confirm' or 'cancel' to confirm or cancel the token creation.\n";
                     response +=
                         "Type 'confirm' to create your token or 'cancel' to start over.\n";
-                } else if (!cachedData.isBurstTokenCreated) {
+                } else {
+                    // If the user has confirmed the creation, let them know the token has been created
                     response +=
-                        "Token creation confirmed! Proceeding with on-chain deployment...\n";
+                        "Status: ✓ Token creation confirmed! Please wait for the token to be created...\n";
+                    action = "NONE";
                 }
             }
 
-            elizaLogger.debug("Response", {
-                response,
-            });
-
-            return response;
+            return {
+                text: response,
+                action,
+            };
         } catch (error) {
             elizaLogger.error(
                 "Error getting create burst token details:",

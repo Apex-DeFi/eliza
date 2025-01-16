@@ -24,6 +24,17 @@ export const ApexBurstOptionalFields = [
     "discord",
 ] as const;
 
+export type ApexBurstInternalField = keyof Pick<
+    ApexCreateBurstTokenData,
+    "lastUpdated" | "isConfirmed" | "hasRequestedConfirmation"
+>;
+
+export const ApexBurstInternalFields = new Set<ApexBurstInternalField>([
+    "lastUpdated",
+    "isConfirmed",
+    "hasRequestedConfirmation",
+]);
+
 // This is the information that is to be gathered from the user to be able to create a burst token
 // Some of these fields are not required, but they are here to make the user experience better
 export interface ApexCreateBurstTokenData {
@@ -47,8 +58,8 @@ export interface ApexCreateBurstTokenData {
     telegram: string | undefined;
     discord: string | undefined;
     // Confirmation fields
-    isConfirmed: boolean | undefined;
-    isBurstTokenCreated: boolean | undefined;
+    hasRequestedConfirmation: boolean;
+    isConfirmed: boolean;
     lastUpdated: number | undefined;
 }
 
@@ -70,8 +81,8 @@ export const emptyCreateBurstTokenData: ApexCreateBurstTokenData = {
     twitter: undefined,
     telegram: undefined,
     discord: undefined,
-    isConfirmed: undefined,
-    isBurstTokenCreated: undefined,
+    hasRequestedConfirmation: false,
+    isConfirmed: false,
     lastUpdated: undefined,
 };
 
@@ -157,11 +168,11 @@ export const BURST_TOKEN_FIELD_GUIDANCE: {
     },
     burstAmount: {
         description: "The amount of Avax required for tokens to Burst",
-        valid: "50-2000 with increments of 5. 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 2000",
+        valid: "50-2000 with increments of 5. 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 180, 185, 190, 195, 2000. 'Amount 350', 'Burst 200', 'Bond 325'",
         invalid:
-            "4, 45, 2001, 2005, 2006, 2007, 2008, 2009, 2010, 3000, -1, 0, 45.5",
+            "4, 2001, 2005, 2006, 2007, 2008, 2009, 2010, 3000, -1, 0, 45.5",
         instructions:
-            "Extract the burst amount of the token from the user's message only when the user directly states the token burst amount",
+            "Extract the burst amount of the token from the user's message only when the user directly states the token burst amount. It must be a multiple of 5 and it must be denominated in Avax or ETH.",
     },
     dexAllocations: {
         description: "The dex allocations for the token's liquidity",

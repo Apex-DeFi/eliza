@@ -1,11 +1,7 @@
 // enums.ts
 export enum BurstDEXs {
-    APEX = "APEX",
-    JOE = "JOE",
-    PHARAOH = "PHARAOH",
-    PANGOLIN = "PANGOLIN",
+    APEX = 0,
+    JOE = 1,
+    PHARAOH = 2,
+    PANGOLIN = 3,
 }
-
-export const convertBurstDEXToNumber = (dex: BurstDEXs) => {
-    return Object.values(BurstDEXs).indexOf(dex);
-};
