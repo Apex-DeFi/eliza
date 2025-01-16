@@ -1,20 +1,23 @@
 import { DexAllocation } from ".";
 import { BurstDEXs } from "./enums";
 
-export const ApexBurstFields = [
+export const ApexBurstRequiredFields = [
     "name",
     "symbol",
     "totalSupply",
-    "image",
-    "banner",
-    "swapSound",
     "description",
-    "tradingFee",
-    "maxWalletPercent",
     "burstAmount",
     "dexAllocations",
     "rewardDex",
     "creatorAddress",
+] as const;
+
+export const ApexBurstOptionalFields = [
+    "tradingFee",
+    "maxWalletPercent",
+    "image",
+    "banner",
+    "swapSound",
     "website",
     "twitter",
     "telegram",
@@ -27,20 +30,23 @@ export interface ApexCreateBurstTokenData {
     name: string | undefined;
     symbol: string | undefined;
     totalSupply: number | undefined;
-    image: string | undefined;
-    banner: string | undefined;
-    swapSound: string | undefined;
     description: string | undefined;
-    tradingFee: number | undefined;
-    maxWalletPercent: number | undefined;
     burstAmount: number | undefined;
     dexAllocations: DexAllocation[] | undefined;
     rewardDex: BurstDEXs | undefined;
     creatorAddress: string | undefined;
+    // Optional fields
+    tradingFee: number | undefined;
+    maxWalletPercent: number | undefined;
+    image: string | undefined;
+    banner: string | undefined;
+    swapSound: string | undefined;
+    // Optional fields for social media
     website: string | undefined;
     twitter: string | undefined;
     telegram: string | undefined;
     discord: string | undefined;
+    // Confirmation fields
     isConfirmed: boolean | undefined;
     isBurstTokenCreated: boolean | undefined;
     lastUpdated: number | undefined;

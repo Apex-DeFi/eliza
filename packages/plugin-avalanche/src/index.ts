@@ -12,8 +12,10 @@ import {
     TOKEN_MILL_CONFIG,
     APEX_CONFIG,
 } from "./utils/constants";
-import { burstTokenDataEvaluator } from "./evaluators/apexCreateBurstToken";
+import { apexGetBurstTokenDataEvaluator } from "./evaluators/apexGetBurstTokenData";
 import { apexCreateBurstTokenProvider } from "./providers/apexCreateBurstToken";
+import { apexCreateBurstTokenEvaluator } from "./evaluators/apexCreateBurstToken";
+import apexBurstTokenTest from "./actions/apexBurstTokenTest";
 
 export const PROVIDER_CONFIG = {
     TOKEN_ADDRESSES: TOKEN_ADDRESSES,
@@ -26,8 +28,8 @@ export const PROVIDER_CONFIG = {
 export const avalanchePlugin: Plugin = {
     name: "avalanche",
     description: "Avalanche Plugin for Eliza",
-    actions: [transfer, yakSwap, yakStrategy],
-    evaluators: [burstTokenDataEvaluator],
+    actions: [transfer, yakSwap, yakStrategy, apexBurstTokenTest],
+    evaluators: [apexGetBurstTokenDataEvaluator, apexCreateBurstTokenEvaluator],
     providers: [
         tokensProvider,
         strategiesProvider,

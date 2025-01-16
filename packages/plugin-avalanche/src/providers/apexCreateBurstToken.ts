@@ -5,7 +5,8 @@ import {
     type Memory,
 } from "@elizaos/core";
 import {
-    ApexBurstFields,
+    ApexBurstRequiredFields,
+    ApexBurstOptionalFields,
     ApexCreateBurstTokenData,
     BURST_TOKEN_FIELD_GUIDANCE,
     emptyCreateBurstTokenData,
@@ -18,20 +19,33 @@ export const getBurstTokenDataCacheKey = (
     return `${runtime.agentId}/${userId}/burstTokenData`;
 };
 
-export const getMissingFields = (
+export const getMissingRequiredFields = (
     cachedData: ApexCreateBurstTokenData
 ): Array<
-    keyof Omit<
-        ApexCreateBurstTokenData,
-        "isBurstTokenCreated" | "lastUpdated" | "isConfirmed"
-    >
+    keyof Omit<ApexCreateBurstTokenData, "isBurstTokenCreated" | "lastUpdated">
 > => {
-    return ApexBurstFields.filter(
+    return ApexBurstRequiredFields.filter(
         (field) =>
             !cachedData[
                 field as keyof Omit<
                     ApexCreateBurstTokenData,
-                    "isBurstTokenCreated" | "lastUpdated" | "isConfirmed"
+                    "isBurstTokenCreated" | "lastUpdated"
+                >
+            ]
+    );
+};
+
+export const getMissingOptionalFields = (
+    cachedData: ApexCreateBurstTokenData
+): Array<
+    keyof Omit<ApexCreateBurstTokenData, "isBurstTokenCreated" | "lastUpdated">
+> => {
+    return ApexBurstOptionalFields.filter(
+        (field) =>
+            !cachedData[
+                field as keyof Omit<
+                    ApexCreateBurstTokenData,
+                    "isBurstTokenCreated" | "lastUpdated"
                 >
             ]
     );
@@ -54,6 +68,11 @@ export const apexCreateBurstTokenProvider: Provider = {
                 cachedData,
             });
 
+            if (cachedData.isBurstTokenCreated) {
+                // if the token has been created, let the user know
+                return `${cachedData.name} has already been created!`;
+            }
+
             let response = "Create Burst Token Status:\n\n";
 
             // Show current information if any exists
@@ -62,19 +81,18 @@ export const apexCreateBurstTokenProvider: Provider = {
                     ([key, value]) =>
                         key !== "isBurstTokenCreated" &&
                         key !== "lastUpdated" &&
-                        key !== "isConfirmed" &&
                         value !== undefined
                 )
-                .map(
-                    ([key, value]) =>
-                        `${key.charAt(0).toUpperCase() + key.slice(1)}: ${
-                            Array.isArray(value)
-                                ? value.join(", ")
-                                : typeof value === "object"
-                                  ? JSON.stringify(value)
-                                  : value
-                        }`
-                );
+                .map(([key, value]) => {
+                    const fieldName =
+                        key.charAt(0).toUpperCase() + key.slice(1);
+                    const fieldValue = Array.isArray(value)
+                        ? JSON.stringify(value)
+                        : typeof value === "object"
+                          ? JSON.stringify(value)
+                          : value;
+                    return `${fieldName}: ${fieldValue}`;
+                });
 
             if (knownFields.length > 0) {
                 response += "Current Information:\n";
@@ -86,27 +104,18 @@ export const apexCreateBurstTokenProvider: Provider = {
                 knownFields,
             });
 
-            const missingFields = getMissingFields(cachedData);
+            const missingRequiredFields = getMissingRequiredFields(cachedData);
+            const missingOptionalFields = getMissingOptionalFields(cachedData);
 
             elizaLogger.info("[Provider] Missing fields", {
-                missingFields,
+                missingRequiredFields,
+                missingOptionalFields,
             });
 
-            if (missingFields.length > 0) {
-                // First, provide a clear, concise bulleted list of all missing fields
-                response += "Required Information:\n\n";
-                missingFields.forEach((field) => {
-                    const fieldGuidance = BURST_TOKEN_FIELD_GUIDANCE[field];
-                    const fieldName =
-                        field.charAt(0).toUpperCase() + field.slice(1);
-                    response += `• ${fieldName}: ${fieldGuidance.description}\n`;
-                    response += `  Example: ${fieldGuidance.valid}\n`;
-                });
-                response += "\n";
-
-                // Then, provide the detailed guidance for reference
-                response += "Detailed Field Requirements:\n\n";
-                missingFields.forEach((field) => {
+            // If there are missing required fields, provide a clear, concise bulleted list of all missing fields
+            if (missingRequiredFields.length > 0) {
+                response += "Required Information and Instructions:\n\n";
+                missingRequiredFields.forEach((field) => {
                     const fieldGuidance = BURST_TOKEN_FIELD_GUIDANCE[field];
                     const fieldName =
                         field.charAt(0).toUpperCase() + field.slice(1);
@@ -116,24 +125,48 @@ export const apexCreateBurstTokenProvider: Provider = {
                     response += `- Do Not Include: ${fieldGuidance.invalid}\n`;
                     response += `- Instructions: ${fieldGuidance.instructions}\n\n`;
                 });
+                response += "\n";
+
+                response += "Optional Information and Instructions:\n\n";
+                missingOptionalFields.forEach((field) => {
+                    const fieldGuidance = BURST_TOKEN_FIELD_GUIDANCE[field];
+                    const fieldName =
+                        field.charAt(0).toUpperCase() + field.slice(1);
+                    response += `${fieldName}:\n`;
+                    response += `- Description: ${fieldGuidance.description}\n`;
+                    response += `- Valid Examples: ${fieldGuidance.valid}\n`;
+                    response += `- Do Not Include: ${fieldGuidance.invalid}\n`;
+                    response += `- Instructions: ${fieldGuidance.instructions}\n\n`;
+                });
+                response += "\n";
 
                 // Add clear instructions for the agent
                 response += "Agent Instructions:\n";
                 response +=
-                    "1. Present the above list of ALL required information to the user at once.\n";
+                    "1. Present the above list of ALL information to the user at once, including required and optional fields.\n";
                 response +=
-                    "2. Ask the user to provide ANY or ALL of the missing information.\n";
+                    "2. Ask the user to provide ANY or ALL of the missing information, including optional fields.\n";
                 response +=
                     "3. Extract information from user responses when clearly stated.\n";
                 response +=
-                    "4. After each user response, show updated status with remaining missing fields.\n";
+                    "4. After each user response, show updated status with remaining missing fields, including optional fields.\n";
                 response +=
                     "5. Verify extracted information matches requirements before storing.\n";
-            } else {
-                response +=
-                    "Status: ✓ All necessary information has been collected.\n";
-                response +=
-                    "Please review and confirm the token details above.\n";
+            }
+
+            if (missingRequiredFields.length === 0) {
+                // All required fields are collected
+                // If the user hasn't confirmed the creation, ask them to review the details and confirm
+                if (!cachedData.isConfirmed) {
+                    response +=
+                        "Status: ✓ All necessary information has been collected.\n";
+                    response += "Please review the details carefully!\n";
+                    response +=
+                        "Type 'confirm' to create your token or 'cancel' to start over.\n";
+                } else if (!cachedData.isBurstTokenCreated) {
+                    response +=
+                        "Token creation confirmed! Proceeding with on-chain deployment...\n";
+                }
             }
 
             elizaLogger.debug("Response", {

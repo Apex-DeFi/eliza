@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { BurstDEXs } from "./enums";
-import { elizaLogger } from "@elizaos/core";
 
 export const burstSchema = z.object({
     name: z.string().describe("The name of the token"),
@@ -128,23 +127,11 @@ export const burstTokenSchema = z.object({
         .array(
             z
                 .object({
+                    // Convert the DEX to uppercase before storing to make sure it matches the enum
                     dex: z
-                        .nativeEnum(BurstDEXs)
-                        .or(z.string())
-                        .transform((val) => {
-                            if (typeof val === "number") return val;
-                            const enumVal =
-                                BurstDEXs[
-                                    val.toUpperCase() as keyof typeof BurstDEXs
-                                ];
-                            if (enumVal === undefined) {
-                                elizaLogger.warn(
-                                    `Invalid DEX value provided: ${val}`
-                                );
-                                return undefined;
-                            }
-                            return enumVal;
-                        }),
+                        .string()
+                        .transform((val) => val.toUpperCase())
+                        .pipe(z.nativeEnum(BurstDEXs).catch(undefined)),
                     allocation: z.number().min(0).max(10000),
                 })
                 .optional()
@@ -152,18 +139,9 @@ export const burstTokenSchema = z.object({
         .optional()
         .describe("The DEX allocations"),
     rewardDex: z
-        .nativeEnum(BurstDEXs)
-        .or(z.string())
-        .transform((val) => {
-            if (typeof val === "number") return val;
-            const enumVal =
-                BurstDEXs[val.toUpperCase() as keyof typeof BurstDEXs];
-            if (enumVal === undefined) {
-                elizaLogger.warn(`Invalid DEX value provided: ${val}`);
-                return undefined;
-            }
-            return enumVal;
-        })
+        .string()
+        .transform((val) => val.toUpperCase())
+        .pipe(z.nativeEnum(BurstDEXs).catch(undefined))
         .optional()
         .describe("The reward DEX of the token"),
     creatorAddress: z
@@ -174,4 +152,8 @@ export const burstTokenSchema = z.object({
     twitter: z.string().optional().describe("The twitter of the token"),
     telegram: z.string().optional().describe("The telegram of the token"),
     discord: z.string().optional().describe("The discord of the token"),
+    isConfirmed: z
+        .boolean()
+        .optional()
+        .describe("Whether the token is confirmed"),
 });
