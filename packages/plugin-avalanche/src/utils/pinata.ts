@@ -12,7 +12,6 @@ export async function uploadImageToIPFS(
     fileName: string
 ): Promise<string> {
     try {
-        elizaLogger.info(`Image data prefix: ${imageData.substring(0, 50)}`);
         const base64Data = imageData.split(",")[1];
         const imageBuffer = Buffer.from(base64Data, "base64");
         const blob = new Blob([imageBuffer], { type: "image/png" });

@@ -127,9 +127,9 @@ If the user is confirming or cancelling the token creation, return an empty obje
             const generatedContent = await generateObject({
                 runtime,
                 context: burstTokenDataExtractionTemplate,
-                modelClass: ModelClass.LARGE,
+                modelClass: ModelClass.MEDIUM,
                 schema: burstTokenSchema,
-                mode: "json",
+                mode: "auto",
             });
 
             let dataUpdated = false;

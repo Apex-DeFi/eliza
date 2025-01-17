@@ -232,5 +232,25 @@ Return a JSON object with isConfirmed field set to true or false based on the an
                 "isConfirmed": "true"
             }`,
         },
+        {
+            context: "User confirms after reviewing details",
+            messages: [
+                {
+                    user: "{{agent}}",
+                    content: {
+                        text: "Please review the token details above. Would you like to proceed with creation?",
+                    },
+                },
+                {
+                    user: "{{user1}}",
+                    content: {
+                        text: "yeah",
+                    },
+                },
+            ],
+            outcome: `{
+                "isConfirmed": "true"
+            }`,
+        },
     ] as EvaluationExample[],
 };

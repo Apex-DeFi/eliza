@@ -87,6 +87,16 @@ export default {
             elizaLogger.info("[CREATE_BURST_TOKEN] creating burst token");
             elizaLogger.info("[CREATE_BURST_TOKEN] cachedData", cachedData);
 
+            // const logoPrompt = await getImagePrompt(
+            //     runtime,
+            //     `${cachedData.imageDescription}`
+            // );
+
+            // const bannerPrompt = await getImagePrompt(
+            //     runtime,
+            //     `${cachedData.imageDescription}`
+            // );
+
             const tokenLogoResult = await generateImage(
                 {
                     hideWatermark: true,
@@ -176,7 +186,8 @@ export default {
                 `Name: ${cachedData.name}\n` +
                 `Symbol: ${cachedData.symbol}\n` +
                 `CA: https://snowtrace.io/address/${tokenAddress}\n` +
-                `TX: https://snowtrace.io/tx/${tx}`;
+                `TX: https://snowtrace.io/tx/${tx}` +
+                `Link: https://apexdefi.xyz/burst/${tokenAddress}`;
 
             elizaLogger.info("[CREATE_BURST_TOKEN] messageText", messageText);
 
@@ -193,7 +204,7 @@ export default {
         } catch (error) {
             elizaLogger.error("Error creating burst token:", error.message);
             callback?.({
-                text: "Error creating burst token:",
+                text: `Error creating burst token - Please try again later and/or notify bifkn.`,
                 content: { cachedData },
             });
 
