@@ -86,7 +86,7 @@ Analyze the following conversation and extract the token details.
 Only extract information (name, symbol, totalSupply, tradingFee, maxWalletPercent, logo, banner, sound, burst amount, dex allocations, creator) when it is explicitly and clearly stated by the user about a token they want to create.
 
 IMPORTANT: If the user indicates they don't want to add any more information (e.g., "no more", "no extras", "skip", "no thanks", etc.) or they are confirming or cancelling the token creation (e.g., "yes", "confirm", "launch", "create", "let's do it", "I'm ready", "make it happen", "let's launch!", "proceed"),
-return an empty object {}. Do not fill in example values.
+return an empty object {}. Do not fill in example values under any circumstances.
 
 Conversation:
 ${message.content.text}
@@ -129,9 +129,9 @@ If the user is confirming or cancelling the token creation, return an empty obje
             const generatedContent = await generateObject({
                 runtime,
                 context: burstTokenDataExtractionTemplate,
-                modelClass: ModelClass.SMALL,
+                modelClass: ModelClass.LARGE,
                 schema: burstTokenSchema,
-                mode: "auto",
+                mode: "json",
             });
 
             let dataUpdated = false;

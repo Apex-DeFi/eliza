@@ -66,8 +66,6 @@ export const apexCreateBurstTokenProvider: Provider = {
                 cachedData,
             });
 
-            let response = "Create Burst Token Status:\n\n";
-
             // Show current information if any exists
             const knownFields = Object.entries(cachedData)
                 .filter(
@@ -87,15 +85,30 @@ export const apexCreateBurstTokenProvider: Provider = {
                     return `${fieldName}: ${fieldValue}`;
                 });
 
+            elizaLogger.info("[Provider] Known fields", {
+                knownFields,
+            });
+
+            // Only proceed with detailed token creation flow if:
+            // 1. We already have some cached data (meaning they started the process), or
+            // 2. The message explicitly mentions creating/making/launching a token
+            const isTokenCreationMessage =
+                /\b(create|make|launch|start|burst|deploy|mint|build|new)\b.*\b(token|coin)\b/i.test(
+                    message.content.text
+                );
+
+            if (!isTokenCreationMessage && knownFields.length === 0) {
+                // If no token creation context, return empty string to let agent respond normally
+                return "";
+            }
+
+            let response = "Create Burst Token Status:\n\n";
+
             if (knownFields.length > 0) {
                 response += "Current Information:\n";
                 response += knownFields.map((field) => `✓ ${field}`).join("\n");
                 response += "\n\n";
             }
-
-            elizaLogger.info("[Provider] Known fields", {
-                knownFields,
-            });
 
             const missingRequiredFields = getMissingRequiredFields(cachedData);
             const missingOptionalFields = getMissingOptionalFields(cachedData);
@@ -104,8 +117,6 @@ export const apexCreateBurstTokenProvider: Provider = {
                 missingRequiredFields,
                 missingOptionalFields,
             });
-
-            let action = "NONE";
 
             // If there are missing required fields, provide a clear, concise bulleted list of all missing fields
             if (missingRequiredFields.length > 0) {
@@ -140,10 +151,9 @@ export const apexCreateBurstTokenProvider: Provider = {
                 response += "\n";
 
                 // Add clear instructions for the agent
-                // Add clear instructions for the agent
                 response += "Agent Instructions:\n";
                 response +=
-                    "1. Present the above list of ALL information to the user at once, including required and optional fields.\n";
+                    "1. Present the above lists of information to the user ALL at once, including required and optional fields.\n";
                 response +=
                     "2. Ask the user to provide ANY or ALL of the missing information, including optional fields.\n";
                 response +=
@@ -165,7 +175,6 @@ export const apexCreateBurstTokenProvider: Provider = {
                     await runtime.cacheManager.set(cacheKey, cachedData, {
                         expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
                     });
-                    action = "CREATE_BURST_TOKEN";
                     response +=
                         "Status: ✓ All necessary information has been collected.\n";
                     response += "Please review the details carefully!\n";
@@ -178,14 +187,10 @@ export const apexCreateBurstTokenProvider: Provider = {
                     // If the user has confirmed the creation, let them know the token has been created
                     response +=
                         "Status: ✓ Token creation confirmed! Please wait for the token to be created...\n";
-                    action = "NONE";
                 }
             }
 
-            return {
-                text: response,
-                action,
-            };
+            return response;
         } catch (error) {
             elizaLogger.error(
                 "Error getting create burst token details:",

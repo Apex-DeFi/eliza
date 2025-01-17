@@ -172,7 +172,7 @@ export const BURST_TOKEN_FIELD_GUIDANCE: {
         invalid:
             "4, 2001, 2005, 2006, 2007, 2008, 2009, 2010, 3000, -1, 0, 45.5",
         instructions:
-            "Extract the burst amount of the token from the user's message only when the user directly states the token burst amount. It must be a multiple of 5 and it must be denominated in Avax or ETH.",
+            "Extract the burst amount of the token from the user's message only when the user directly states the token burst amount. It must be a multiple of 5 and it must be denominated in Avax.",
     },
     dexAllocations: {
         description: "The dex allocations for the token's liquidity",
