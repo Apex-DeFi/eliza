@@ -153,7 +153,10 @@ export const apexCreateBurstTokenProvider: Provider = {
             if (missingRequiredFields.length === 0) {
                 if (!cachedData.isConfirmed) {
                     cachedData.hasRequestedConfirmation = true;
-                    await runtime.cacheManager.set(cacheKey, cachedData);
+                    await runtime.cacheManager.set(cacheKey, cachedData, {
+                        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
+                    });
+
                     response +=
                         "Status: ✓ All necessary information collected.\n";
                     response += "Please review the details above!\n";

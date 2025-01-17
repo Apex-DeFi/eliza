@@ -61,7 +61,10 @@ export const apexConfirmBurstTokenEvaluator: Evaluator = {
                 )) || { ...emptyCreateBurstTokenData };
 
             // Run if the data is complete and the token hasn't been created
-            return canBeConfirmed(cachedData);
+            return (
+                canBeConfirmed(cachedData) &&
+                cachedData.hasRequestedConfirmation
+            );
         } catch (error) {
             elizaLogger.error(
                 `Error in apexCreateBurstTokenEvaluator: ${error.message}`
