@@ -15,9 +15,9 @@ export const ApexBurstRequiredFields = [
 export const ApexBurstOptionalFields = [
     "tradingFee",
     "maxWalletPercent",
-    "image",
-    "banner",
-    "swapSound",
+    "imageDescription",
+    // "banner",
+    // "swapSound",
     "website",
     "twitter",
     "telegram",
@@ -49,9 +49,9 @@ export interface ApexCreateBurstTokenData {
     // Optional fields
     tradingFee: number | undefined;
     maxWalletPercent: number | undefined;
-    image: string | undefined;
-    banner: string | undefined;
-    swapSound: string | undefined;
+    imageDescription: string | undefined;
+    // banner: string | undefined;
+    // swapSound: string | undefined;
     // Optional fields for social media
     website: string | undefined;
     twitter: string | undefined;
@@ -67,9 +67,9 @@ export const emptyCreateBurstTokenData: ApexCreateBurstTokenData = {
     name: undefined,
     symbol: undefined,
     totalSupply: undefined,
-    image: undefined,
-    banner: undefined,
-    swapSound: undefined,
+    imageDescription: undefined,
+    // banner: undefined,
+    // swapSound: undefined,
     description: undefined,
     tradingFee: undefined,
     maxWalletPercent: undefined,
@@ -120,30 +120,38 @@ export const BURST_TOKEN_FIELD_GUIDANCE: {
         instructions:
             "Extract the total supply of the token from the user's message only when the user directly states the token total supply",
     },
-    image: {
-        description:
-            "The image of the token as an attachment or uploaded image or url",
-        valid: "https://example.com/image.png, https://example.com/image.jpg, https://example.com/image.jpeg, https://example.com/image.gif, https://example.com/image.webp. Could also be an attachment or uploaded image",
-        invalid: "image.png, image.jpg, image.jpeg, image.gif, image.webp",
+    imageDescription: {
+        description: "The description of the image of the token",
+        valid: "The description of the image of the token must be a string",
+        invalid:
+            "A link or url to a website, twitter, telegram, discord, or other social media.",
         instructions:
-            "Extract the image URI of the token from the user's message only when the user directly states the token image URI",
+            "Extract the description of the image of the token from the user's message only when the user directly states the token image description",
     },
-    banner: {
-        description:
-            "The banner of the token as an attachment or uploaded image or url",
-        valid: "https://example.com/banner.png, https://example.com/banner.jpg, https://example.com/banner.jpeg, https://example.com/banner.gif, https://example.com/banner.webp. Could also be an attachment or uploaded image",
-        invalid: "banner.png, banner.jpg, banner.jpeg, banner.gif, banner.webp",
-        instructions:
-            "Extract the banner URI of the token from the user's message only when the user directly states the token banner URI",
-    },
-    swapSound: {
-        description:
-            "The swap sound of the token as an attachment or uploaded sound or url",
-        valid: "https://example.com/swap.mp3, https://example.com/swap.wav, https://example.com/swap.ogg. Could also be an attachment or uploaded sound",
-        invalid: "swap.mp3, swap.wav, swap.ogg",
-        instructions:
-            "Extract the swap sound URI of the token from the user's message only when the user directly states the token swap sound URI",
-    },
+    // image: {
+    //     description:
+    //         "The image of the token as an attachment or uploaded image or url",
+    //     valid: "https://example.com/image.png, https://example.com/image.jpg, https://example.com/image.jpeg, https://example.com/image.gif, https://example.com/image.webp. Could also be an attachment or uploaded image",
+    //     invalid: "image.png, image.jpg, image.jpeg, image.gif, image.webp",
+    //     instructions:
+    //         "Extract the image URI of the token from the user's message only when the user directly states the token image URI",
+    // },
+    // banner: {
+    //     description:
+    //         "The banner of the token as an attachment or uploaded image or url",
+    //     valid: "https://example.com/banner.png, https://example.com/banner.jpg, https://example.com/banner.jpeg, https://example.com/banner.gif, https://example.com/banner.webp. Could also be an attachment or uploaded image",
+    //     invalid: "banner.png, banner.jpg, banner.jpeg, banner.gif, banner.webp",
+    //     instructions:
+    //         "Extract the banner URI of the token from the user's message only when the user directly states the token banner URI",
+    // },
+    // swapSound: {
+    //     description:
+    //         "The swap sound of the token as an attachment or uploaded sound or url",
+    //     valid: "https://example.com/swap.mp3, https://example.com/swap.wav, https://example.com/swap.ogg. Could also be an attachment or uploaded sound",
+    //     invalid: "swap.mp3, swap.wav, swap.ogg",
+    //     instructions:
+    //         "Extract the swap sound URI of the token from the user's message only when the user directly states the token swap sound URI",
+    // },
     description: {
         description: "The description of the token",
         valid: "The description of the token must be a string",

@@ -6,6 +6,7 @@ import {
     Memory,
     State,
     elizaLogger,
+    generateImage,
 } from "@elizaos/core";
 import { validateAvalancheConfig } from "../environment";
 import { emptyCreateBurstTokenData } from "../types/apex";
@@ -82,6 +83,31 @@ export default {
 
         try {
             elizaLogger.info("[CREATE_BURST_TOKEN] creating burst token");
+            elizaLogger.info("[CREATE_BURST_TOKEN] cachedData", cachedData);
+
+            const imageResult = await generateImage(
+                {
+                    hideWatermark: true,
+                    prompt: `logo for (${cachedData.symbol}) token - ${cachedData.imageDescription}`,
+                    width: 256,
+                    height: 256,
+                    count: 1,
+                },
+                runtime
+            );
+
+            elizaLogger.info("[CREATE_BURST_TOKEN] imageResult", imageResult);
+
+            if (imageResult.success) {
+                const imageBuffer = Buffer.from(imageResult.data[0], "base64");
+                callback?.({
+                    text: "🔄 Generating image...",
+                    content: { imageBuffer },
+                    action: "BURST_TOKEN",
+                    type: "processing",
+                });
+            }
+
             const { tx, tokenAddress } = await createApexBurstToken(
                 runtime,
                 cachedData
@@ -103,12 +129,16 @@ export default {
 
             // Clear the cached data after the token has been created
             await runtime.cacheManager.delete(cacheKey);
+
+            return true;
         } catch (error) {
             elizaLogger.error("Error creating burst token:", error.message);
             callback?.({
                 text: "Error creating burst token:",
                 content: { cachedData },
             });
+
+            return false;
         }
     },
     examples: [

@@ -83,7 +83,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
 
             const burstTokenDataExtractionTemplate = `
 Analyze the following conversation and extract the token details.
-Only extract information (name, symbol, totalSupply, tradingFee, maxWalletPercent, logo, banner, sound, burst amount, dex allocations, creator) when it is explicitly and clearly stated by the user about a token they want to create.
+Only extract information (name, symbol, totalSupply, tradingFee, maxWalletPercent, image description, burst amount, dex allocations, creator) when it is explicitly and clearly stated by the user about a token they want to create.
 
 IMPORTANT: If the user indicates they don't want to add any more information (e.g., "no more", "no extras", "skip", "no thanks", etc.) or they are confirming or cancelling the token creation (e.g., "yes", "confirm", "launch", "create", "let's do it", "I'm ready", "make it happen", "let's launch!", "proceed"),
 return an empty object {}. Do not fill in example values under any circumstances.
@@ -98,9 +98,7 @@ Return a JSON object containing only the fields where information was clearly fo
     "name": string,
     "symbol": string,
     "totalSupply": number,
-    "image": string,
-    "banner": string,
-    "swapSound": string,
+    "imageDescription": string,
     "description": string,
     "tradingFee": number,
     "maxWalletPercent": number,
@@ -184,7 +182,7 @@ If the user is confirming or cancelling the token creation, return an empty obje
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "I want to create a token called Apex Rewards with symbol APR. Total supply should be 1000000 tokens. Set trading fee to 2.5%, max wallet to 5%. Allocate 60% to APEX as reward pool, 20% to JOE, and 20% to PHARAOH. Burst amount is 325. Website is apexrewards.io, Twitter @apexrewards, Telegram @apexrewards_tg, Discord apexrewards. Here's my creator address: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e. Description: First community-driven rewards token on Apex. Image URI: ipfs://Qm..., Banner URI: ipfs://Qm..., Swap sound: ipfs://Qm...",
+                        text: "I want to create a token called Apex Rewards with symbol APR. Total supply should be 1000000 tokens. Set trading fee to 2.5%, max wallet to 5%. Allocate 60% to APEX as reward pool, 20% to JOE, and 20% to PHARAOH. Burst amount is 325. Website is apexrewards.io, Twitter @apexrewards, Telegram @apexrewards_tg, Discord apexrewards. Here's my creator address: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e. Description: First community-driven rewards token on Apex. Image Description: a logo of a shark with the word Apex Rewards in the middle",
                     },
                 },
             ],
@@ -192,9 +190,7 @@ If the user is confirming or cancelling the token creation, return an empty obje
                 "name": "Apex Rewards",
                 "symbol": "APR",
                 "totalSupply": 1000000,
-                "image": "ipfs://Qm...",
-                "banner": "ipfs://Qm...",
-                "swapSound": "ipfs://Qm...",
+                "imageDescription": "a logo of a shark with the word Apex Rewards in the middle",
                 "description": "First community-driven rewards token on Apex",
                 "tradingFee": 250,
                 "maxWalletPercent": 500,
@@ -313,7 +309,7 @@ If the user is confirming or cancelling the token creation, return an empty obje
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "Launch token GameFi Hub (GFH). Trading fee 2.5%, max wallet 4.25%. Split 50% APEX (reward), 25% each JOE and PANGOLIN. Banner: ipfs://Qm..., Image: ipfs://Qm..., Swap sound: ipfs://Qm... Description: GameFi Hub is the ultimate gaming token. Twitter @gamefihub, Telegram @gfhub",
+                        text: "Launch token GameFi Hub (GFH). Trading fee 2.5%, max wallet 4.25%. Split 50% APEX (reward), 25% each JOE and PANGOLIN. Image Description: a logo of a shark with the word GameFi Hub in the middle. Description: GameFi Hub is the ultimate gaming token. Twitter @gamefihub, Telegram @gfhub",
                     },
                 },
             ],
@@ -322,9 +318,7 @@ If the user is confirming or cancelling the token creation, return an empty obje
                 "symbol": "GFH",
                 "tradingFee": 250,
                 "maxWalletPercent": 425,
-                "banner": "ipfs://Qm...",
-                "image": "ipfs://Qm...",
-                "swapSound": "ipfs://Qm...",
+                "imageDescription": "a logo of a shark with the word GameFi Hub in the middle",
                 "description": "GameFi Hub is the ultimate gaming token",
                 "twitter": "@gamefihub",
                 "telegram": "@gfhub",
@@ -354,7 +348,7 @@ If the user is confirming or cancelling the token creation, return an empty obje
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "Creating new token DigiDragon (DDRG). Trading fee 3%, max wallet 2.5%. Allocations: 60% APEX as reward, 20% JOE, 20% PANGOLIN. Banner image: https://imgur.com/a/ABC123, token logo: https://i.imgur.com/XYZ789.png, and the swap sound is https://direct.link/sound.mp3",
+                        text: "Creating new token DigiDragon (DDRG). Trading fee 3%, max wallet 2.5%. Allocations: 60% APEX as reward, 20% JOE, 20% PANGOLIN. Image Description: a logo of a dragon with the word DigiDragon in the middle",
                     },
                 },
             ],
@@ -363,9 +357,7 @@ If the user is confirming or cancelling the token creation, return an empty obje
                 "symbol": "DDRG",
                 "tradingFee": 300,
                 "maxWalletPercent": 250,
-                "banner": "https://imgur.com/a/ABC123",
-                "image": "https://i.imgur.com/XYZ789.png",
-                "swapSound": "https://direct.link/sound.mp3",
+                "imageDescription": "a logo of a dragon with the word DigiDragon in the middle",
                 "dexAllocations": [
                     { "dex": "APEX", "allocation": 6000 },
                     { "dex": "JOE", "allocation": 2000 },
@@ -375,29 +367,12 @@ If the user is confirming or cancelling the token creation, return an empty obje
             }`,
         },
         {
-            context: "Token creation with agent-attached media",
+            context: "Token creation with image description",
             messages: [
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "Let's create token CyberPunk (PUNK). 2% trading fee, 3% max wallet. Split 40% APEX (reward), 30% each for JOE and PANGOLIN.",
-                        attachments: [
-                            {
-                                type: "image",
-                                id: "banner-123",
-                                url: "agent-storage://banner-123.png",
-                            },
-                            {
-                                type: "image",
-                                id: "logo-456",
-                                url: "agent-storage://logo-456.png",
-                            },
-                            {
-                                type: "audio",
-                                id: "swap-789",
-                                url: "agent-storage://swap-789.mp3",
-                            },
-                        ],
+                        text: "Let's create token CyberPunk (PUNK). 2% trading fee, 3% max wallet. Split 40% APEX (reward), 30% each for JOE and PANGOLIN. Image Description: a logo of a shark with the word CyberPunk in the middle",
                     },
                 },
             ],
@@ -406,9 +381,7 @@ If the user is confirming or cancelling the token creation, return an empty obje
                 "symbol": "PUNK",
                 "tradingFee": 200,
                 "maxWalletPercent": 300,
-                "banner": "agent-storage://banner-123.png",
-                "image": "agent-storage://logo-456.png",
-                "swapSound": "agent-storage://swap-789.mp3",
+                "imageDescription": "a logo of a shark with the word CyberPunk in the middle",
                 "dexAllocations": [
                     { "dex": "APEX", "allocation": 4000 },
                     { "dex": "JOE", "allocation": 3000 },
@@ -418,24 +391,12 @@ If the user is confirming or cancelling the token creation, return an empty obje
             }`,
         },
         {
-            context: "Mixed media sources with partial attachments",
+            context: "Token creation with image description",
             messages: [
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "Creating MetaWars token (MWAR). Fee 2.5%, max wallet 4%. 45% APEX (reward), 30% JOE, 25% PANGOLIN. Banner is https://imgur.com/a/DEF456",
-                        attachments: [
-                            {
-                                type: "image",
-                                id: "logo-789",
-                                url: "agent-storage://logo-789.png",
-                            },
-                            {
-                                type: "audio",
-                                id: "swap-101",
-                                url: "agent-storage://swap-101.mp3",
-                            },
-                        ],
+                        text: "Creating MetaWars token (MWAR). Fee 2.5%, max wallet 4%. 45% APEX (reward), 30% JOE, 25% PANGOLIN. Image Description: a logo of a shark with the word MetaWars in the middle",
                     },
                 },
             ],
@@ -444,9 +405,7 @@ If the user is confirming or cancelling the token creation, return an empty obje
                 "symbol": "MWAR",
                 "tradingFee": 250,
                 "maxWalletPercent": 400,
-                "banner": "https://imgur.com/a/DEF456",
-                "image": "agent-storage://logo-789.png",
-                "swapSound": "agent-storage://swap-101.mp3",
+                "imageDescription": "a logo of a shark with the word MetaWars in the middle",
                 "dexAllocations": [
                     { "dex": "APEX", "allocation": 4500 },
                     { "dex": "JOE", "allocation": 3000 },

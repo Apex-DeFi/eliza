@@ -70,7 +70,7 @@ export const apexConfirmBurstTokenEvaluator: Evaluator = {
         }
     },
     handler: async (runtime: IAgentRuntime, message: Memory) => {
-        elizaLogger.info("CREATE_BURST_TOKEN handler");
+        elizaLogger.info("CONFIRM_BURST_TOKEN handler");
         try {
             const cacheKey = getBurstTokenDataCacheKey(runtime, message.userId);
             const cachedData =

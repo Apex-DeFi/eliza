@@ -14,6 +14,14 @@ import {
     ApexBurstInternalField,
 } from "../types/apex";
 
+// Simplified guidance to reduce token usage
+const getMinimalFieldGuidance = (
+    field: keyof typeof BURST_TOKEN_FIELD_GUIDANCE
+) => ({
+    description: BURST_TOKEN_FIELD_GUIDANCE[field].description,
+    valid: BURST_TOKEN_FIELD_GUIDANCE[field].valid.split(".")[0], // Only first example
+});
+
 export const getBurstTokenDataCacheKey = (
     runtime: IAgentRuntime,
     userId: string
@@ -53,18 +61,10 @@ export const apexCreateBurstTokenProvider: Provider = {
     get: async (runtime: IAgentRuntime, message: Memory) => {
         try {
             const cacheKey = getBurstTokenDataCacheKey(runtime, message.userId);
-            elizaLogger.info("[Provider] Getting burst token data for user", {
-                cacheKey,
-                message,
-            });
             const cachedData =
                 (await runtime.cacheManager.get<ApexCreateBurstTokenData>(
                     cacheKey
                 )) || { ...emptyCreateBurstTokenData };
-
-            elizaLogger.info("[Provider] Cached data", {
-                cachedData,
-            });
 
             // Show current information if any exists
             const knownFields = Object.entries(cachedData)
@@ -85,22 +85,17 @@ export const apexCreateBurstTokenProvider: Provider = {
                     return `${fieldName}: ${fieldValue}`;
                 });
 
-            elizaLogger.info("[Provider] Known fields", {
-                knownFields,
-            });
-
-            // Only proceed with detailed token creation flow if:
-            // 1. We already have some cached data (meaning they started the process), or
-            // 2. The message explicitly mentions creating/making/launching a token
+            // Check if this is a token creation message
             const isTokenCreationMessage =
                 /\b(create|make|launch|start|burst|deploy|mint|build|new)\b.*\b(token|coin)\b/i.test(
                     message.content.text
                 );
 
             if (!isTokenCreationMessage && knownFields.length === 0) {
-                // If no token creation context, return empty string to let agent respond normally
                 return "";
             }
+
+            elizaLogger.debug("knownFields", knownFields);
 
             let response = "Create Burst Token Status:\n\n";
 
@@ -111,80 +106,60 @@ export const apexCreateBurstTokenProvider: Provider = {
             }
 
             const missingRequiredFields = getMissingRequiredFields(cachedData);
-            const missingOptionalFields = getMissingOptionalFields(cachedData);
+            // const missingOptionalFields = getMissingOptionalFields(cachedData);
 
-            elizaLogger.info("[Provider] Missing fields", {
-                missingRequiredFields,
-                missingOptionalFields,
-            });
+            // Check if user is asking for detailed guidance
+            const isAskingForHelp = /what|how|explain|help|guide/i.test(
+                message.content.text
+            );
 
-            // If there are missing required fields, provide a clear, concise bulleted list of all missing fields
             if (missingRequiredFields.length > 0) {
-                response +=
-                    "CURRENT TASK FOR " +
-                    runtime.character.name +
-                    " IS TO COLLECT THE FOLLOWING INFORMATION.\n\n";
-                response += "Required Information and Instructions:\n\n";
-                missingRequiredFields.forEach((field) => {
-                    const fieldGuidance = BURST_TOKEN_FIELD_GUIDANCE[field];
-                    const fieldName =
-                        field.charAt(0).toUpperCase() + field.slice(1);
-                    response += `${fieldName}:\n`;
-                    response += `- Description: ${fieldGuidance.description}\n`;
-                    response += `- Valid Examples: ${fieldGuidance.valid}\n`;
-                    response += `- Do Not Include: ${fieldGuidance.invalid}\n`;
-                    response += `- Instructions: ${fieldGuidance.instructions}\n`;
-                });
+                response += `CURRENT TASK FOR ${runtime.character.name} IS TO COLLECT THE FOLLOWING INFORMATION.\n\n`;
+
+                if (isAskingForHelp) {
+                    // Provide full guidance when help is requested
+                    response += "Required Information and Instructions:\n\n";
+                    missingRequiredFields.forEach((field) => {
+                        const fieldGuidance = BURST_TOKEN_FIELD_GUIDANCE[field];
+                        const fieldName =
+                            field.charAt(0).toUpperCase() + field.slice(1);
+                        response += `${fieldName}:\n`;
+                        response += `- Description: ${fieldGuidance.description}\n`;
+                        response += `- Valid Examples: ${fieldGuidance.valid}\n`;
+                        response += `- Do Not Include: ${fieldGuidance.invalid}\n`;
+                        response += `- Instructions: ${fieldGuidance.instructions}\n`;
+                    });
+                } else {
+                    // Provide minimal guidance by default
+                    response += "Required Information:\n";
+                    missingRequiredFields.forEach((field) => {
+                        const guidance = getMinimalFieldGuidance(field);
+                        const fieldName =
+                            field.charAt(0).toUpperCase() + field.slice(1);
+                        response += `${fieldName}:\n`;
+                        response += `- ${guidance.description}\n`;
+                        response += `- Example: ${guidance.valid}\n`;
+                    });
+                }
                 response += "\n";
 
-                response += "Optional Information and Instructions:\n\n";
-                missingOptionalFields.forEach((field) => {
-                    const fieldGuidance = BURST_TOKEN_FIELD_GUIDANCE[field];
-                    const fieldName =
-                        field.charAt(0).toUpperCase() + field.slice(1);
-                    response += `${fieldName}:\n`;
-                    response += `- Description: ${fieldGuidance.description}\n`;
-                    response += `- Valid Examples: ${fieldGuidance.valid}\n`;
-                    response += `- Do Not Include: ${fieldGuidance.invalid}\n`;
-                    response += `- Instructions: ${fieldGuidance.instructions}\n`;
-                });
-                response += "\n";
-
-                // Add clear instructions for the agent
-                response += "Agent Instructions:\n";
-                response +=
-                    "1. Present the above lists of information to the user ALL at once, including required and optional fields.\n";
-                response +=
-                    "2. Ask the user to provide ANY or ALL of the missing information, including optional fields.\n";
-                response +=
-                    "3. Extract information from user responses when clearly stated.\n";
-                response +=
-                    "4. After each user response, show updated status with remaining missing fields, including optional fields.\n";
-                response +=
-                    "5. Verify extracted information matches requirements before storing.\n";
+                // Only show optional fields if specifically requested
+                if (isAskingForHelp) {
+                    response +=
+                        "Optional Information Available - Ask for details if interested.\n\n";
+                }
             }
 
             if (missingRequiredFields.length === 0) {
-                // All required fields are collected
-                // If the user hasn't confirmed the creation, ask them to review the details and confirm
                 if (!cachedData.isConfirmed) {
-                    // This needs to be more explicit and clear as the agent doesn't always request confirmation
-                    // Especially if the users follow up was to add an optional field
-                    // If we are in this block always ask for confirmation
                     cachedData.hasRequestedConfirmation = true;
-                    await runtime.cacheManager.set(cacheKey, cachedData, {
-                        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
-                    });
+                    await runtime.cacheManager.set(cacheKey, cachedData);
                     response +=
-                        "Status: ✓ All necessary information has been collected.\n";
-                    response += "Please review the details carefully!\n";
-                    response += "Rules:\n";
-                    response +=
-                        "1. You must always inform the user they can type 'confirm' or 'cancel' to confirm or cancel the token creation.\n";
+                        "Status: ✓ All necessary information collected.\n";
+                    response += "Please review the details above!\n";
                     response +=
                         "Type 'confirm' to create your token or 'cancel' to start over.\n";
                 } else {
-                    // If the user has confirmed the creation, let them know the token has been created
                     response +=
                         "Status: ✓ Token creation confirmed! Please wait for the token to be created...\n";
                 }
