@@ -9,10 +9,12 @@ import {
     generateImage,
 } from "@elizaos/core";
 import { validateAvalancheConfig } from "../environment";
-import { emptyCreateBurstTokenData } from "../types/apex";
+import { emptyCreateBurstTokenData, TokenMetadata } from "../types/apex";
 import { getBurstTokenDataCacheKey } from "../providers/apexCreateBurstToken";
 import { ApexCreateBurstTokenData } from "../types/apex";
 import { createApexBurstToken } from "../utils/apexBurst";
+import { uploadImageToIPFS, uploadMetadataToIPFS } from "../utils/pinata";
+import { PinataSDK } from "pinata-web3";
 
 export default {
     name: "CREATE_BURST_TOKEN",
@@ -85,7 +87,7 @@ export default {
             elizaLogger.info("[CREATE_BURST_TOKEN] creating burst token");
             elizaLogger.info("[CREATE_BURST_TOKEN] cachedData", cachedData);
 
-            const imageResult = await generateImage(
+            const tokenLogoResult = await generateImage(
                 {
                     hideWatermark: true,
                     prompt: `logo for (${cachedData.symbol}) token - ${cachedData.imageDescription}`,
@@ -96,21 +98,78 @@ export default {
                 runtime
             );
 
-            elizaLogger.info("[CREATE_BURST_TOKEN] imageResult", imageResult);
+            const bannerImageResult = await generateImage(
+                {
+                    hideWatermark: true,
+                    prompt: `banner for (${cachedData.symbol}) token - ${cachedData.imageDescription}`,
+                    width: 1500,
+                    height: 500,
+                    count: 1,
+                },
+                runtime
+            );
 
-            if (imageResult.success) {
-                const imageBuffer = Buffer.from(imageResult.data[0], "base64");
-                callback?.({
-                    text: "🔄 Generating image...",
-                    content: { imageBuffer },
-                    action: "BURST_TOKEN",
-                    type: "processing",
-                });
+            let logoIpfsHash = null;
+            let bannerIpfsHash = null;
+
+            // Initialize Pinata
+            const pinata = new PinataSDK({
+                pinataJwt: runtime.getSetting("PINATA_JWT"),
+                pinataGateway: runtime.getSetting("PINATA_GATEWAY_URL"),
+            });
+
+            if (tokenLogoResult.success && tokenLogoResult.data?.[0]) {
+                logoIpfsHash = await uploadImageToIPFS(
+                    pinata,
+                    tokenLogoResult.data[0],
+                    `${cachedData.symbol}_logo.png`
+                );
+                elizaLogger.info(
+                    "[CREATE_BURST_TOKEN] Logo uploaded to IPFS:",
+                    logoIpfsHash
+                );
             }
+
+            if (bannerImageResult.success && bannerImageResult.data?.[0]) {
+                bannerIpfsHash = await uploadImageToIPFS(
+                    pinata,
+                    bannerImageResult.data[0],
+                    `${cachedData.symbol}_banner.png`
+                );
+                elizaLogger.info(
+                    "[CREATE_BURST_TOKEN] Banner uploaded to IPFS:",
+                    bannerIpfsHash
+                );
+            }
+
+            // Create and upload metadata
+            const metadata: TokenMetadata = {
+                name: cachedData.name,
+                ticker: cachedData.symbol,
+                logo: logoIpfsHash,
+                banner: bannerIpfsHash,
+                website: cachedData?.website ?? "",
+                x: cachedData?.twitter ?? "",
+                telegram: cachedData?.telegram ?? "",
+                discord: cachedData?.discord ?? "",
+                description: cachedData?.description ?? "",
+                decimals: 18,
+                burstAudio: {
+                    name: null,
+                    ipfsURI: null,
+                },
+            };
+
+            const metadataUri = await uploadMetadataToIPFS(pinata, metadata);
+            elizaLogger.info(
+                "[CREATE_BURST_TOKEN] Metadata uploaded to IPFS:",
+                metadataUri
+            );
 
             const { tx, tokenAddress } = await createApexBurstToken(
                 runtime,
-                cachedData
+                cachedData,
+                metadataUri
             );
             const messageText =
                 `Created token for ${cachedData.creatorAddress}\n` +

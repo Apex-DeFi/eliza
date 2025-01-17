@@ -1,6 +1,25 @@
 import { DexAllocation } from ".";
 import { BurstDEXs } from "./enums";
 
+export interface TokenMetadata {
+    name: string;
+    ticker: string;
+    logo: string | null;
+    banner: string | null;
+    website: string;
+    x: string;
+    telegram: string;
+    discord: string;
+    description: string;
+    decimals: number;
+    burstAudio: BurstAudioMetaData;
+}
+
+export interface BurstAudioMetaData {
+    name: string | null;
+    ipfsURI: string | null;
+}
+
 export const ApexBurstRequiredFields = [
     "name",
     "symbol",

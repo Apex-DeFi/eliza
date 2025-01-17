@@ -19,7 +19,8 @@
         "dist"
     ],
     "dependencies": {
-        "@elizaos/core": "workspace:*"
+        "@elizaos/core": "workspace:*",
+        "pinata-web3": "^0.5.4"
     },
     "devDependencies": {
         "tsup": "8.3.5"
