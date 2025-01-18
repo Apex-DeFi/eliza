@@ -24,18 +24,21 @@ export const canBeConfirmed = (data: ApexCreateBurstTokenData) => {
     );
 
     if (
-        data.name &&
-        data.symbol &&
-        data.description &&
-        data.totalSupply &&
-        data.burstAmount &&
-        data.dexAllocations &&
+        data.name !== undefined &&
+        data.name.length > 0 &&
+        data.symbol !== undefined &&
+        data.symbol.length > 0 &&
+        data.description !== undefined &&
+        data.description.length > 0 &&
+        data.totalSupply !== undefined &&
+        data.burstAmount !== undefined &&
+        data.dexAllocations !== undefined &&
         data.dexAllocations.length > 0 &&
         data.dexAllocations.every((dex) => dex.dex !== undefined) &&
         data.dexAllocations.every((dex) => dex.allocation !== undefined) &&
         totalAllocation === 10000 &&
-        data.rewardDex &&
-        data.creatorAddress
+        data.rewardDex !== undefined &&
+        data.creatorAddress !== undefined
     ) {
         return true;
     }
