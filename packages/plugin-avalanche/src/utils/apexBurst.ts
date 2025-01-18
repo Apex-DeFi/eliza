@@ -17,6 +17,31 @@ import { burstFactoryAbi } from "../abi";
 import { ApexCreateBurstTokenData } from "../types/apex";
 import { getMissingRequiredFields } from "../providers/apexCreateBurstToken";
 
+export const canBeConfirmed = (data: ApexCreateBurstTokenData) => {
+    const totalAllocation = data.dexAllocations?.reduce(
+        (acc, dex) => acc + dex.allocation,
+        0
+    );
+
+    if (
+        data.name &&
+        data.symbol &&
+        data.description &&
+        data.totalSupply &&
+        data.burstAmount &&
+        data.dexAllocations &&
+        data.dexAllocations.length > 0 &&
+        data.dexAllocations.every((dex) => dex.dex !== undefined) &&
+        data.dexAllocations.every((dex) => dex.allocation !== undefined) &&
+        totalAllocation === 10000 &&
+        data.rewardDex &&
+        data.creatorAddress
+    ) {
+        return true;
+    }
+    return false;
+};
+
 export const createApexBurstToken = async (
     runtime: IAgentRuntime,
     apexBurstTokenData: ApexCreateBurstTokenData,

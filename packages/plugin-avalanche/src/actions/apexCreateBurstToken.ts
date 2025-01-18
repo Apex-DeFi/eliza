@@ -4,18 +4,21 @@ import {
     HandlerCallback,
     IAgentRuntime,
     Memory,
+    ModelClass,
     State,
     elizaLogger,
     generateImage,
+    generateObject,
 } from "@elizaos/core";
 import { validateAvalancheConfig } from "../environment";
 import { emptyCreateBurstTokenData, TokenMetadata } from "../types/apex";
 import { getBurstTokenDataCacheKey } from "../providers/apexCreateBurstToken";
 import { ApexCreateBurstTokenData } from "../types/apex";
-import { createApexBurstToken } from "../utils/apexBurst";
+import { canBeConfirmed, createApexBurstToken } from "../utils/apexBurst";
 import { uploadImageToIPFS, uploadMetadataToIPFS } from "../utils/pinata";
 import { PinataSDK } from "pinata-web3";
-
+import { getConfirmationTemplate } from "../templates/apex";
+import { z } from "zod";
 export default {
     name: "CREATE_BURST_TOKEN",
     similes: [
@@ -50,9 +53,11 @@ export default {
                 )) || { ...emptyCreateBurstTokenData };
 
             const result =
-                cachedData.hasRequestedConfirmation && cachedData.isConfirmed;
+                cachedData.hasRequestedConfirmation &&
+                !cachedData.isConfirmed &&
+                canBeConfirmed(cachedData);
             elizaLogger.log(
-                `[CREATE_BURST_TOKEN] hasRequestedConfirmation: ${cachedData.hasRequestedConfirmation}, isConfirmed: ${cachedData.isConfirmed}`
+                `[CREATE_BURST_TOKEN] hasRequestedConfirmation: ${cachedData.hasRequestedConfirmation}` //, isConfirmed: ${cachedData.isConfirmed}`
             );
 
             return result;
@@ -84,23 +89,75 @@ export default {
             )) || { ...emptyCreateBurstTokenData };
 
         try {
+            // Set to true to indicate that the user has confirmed the token creation
+            // This is used to prevent the action from being run again for this user
+            // until it completes
+            cachedData.isConfirmed = true;
+            await runtime.cacheManager.set(cacheKey, cachedData, {
+                expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
+            });
+
             elizaLogger.info("[CREATE_BURST_TOKEN] creating burst token");
             elizaLogger.info("[CREATE_BURST_TOKEN] cachedData", cachedData);
 
+            // Extract confirmation from message using template/schema
+            const confirmationTemplate = await getConfirmationTemplate(
+                message.content.text
+            );
+
+            const result = await generateObject({
+                runtime,
+                context: confirmationTemplate,
+                modelClass: ModelClass.SMALL,
+                schema: z.object({
+                    isConfirmed: z
+                        .boolean()
+                        .optional()
+                        .describe(
+                            "true if the user is confirming the token creation, false if they are cancelling"
+                        ),
+                }),
+                mode: "auto",
+            });
+
+            elizaLogger.info(
+                "[CREATE_BURST_TOKEN] result",
+                result.object || "No result"
+            );
+
+            // Update cache with confirmation status
+            if (result.object && result.object["isConfirmed"] !== undefined) {
+                const userConfirmed = result.object["isConfirmed"];
+
+                if (!userConfirmed) {
+                    elizaLogger.info(
+                        "[CREATE_BURST_TOKEN] user cancelled token creation"
+                    );
+                    // User cancelled the token creation, clear the cached data
+                    await runtime.cacheManager.delete(cacheKey);
+                    return false;
+                }
+            }
+
+            const imageDescription =
+                cachedData.imageDescription ?? cachedData.description;
+
             // const logoPrompt = await getImagePrompt(
             //     runtime,
-            //     `${cachedData.imageDescription}`
+            //     `${imageDescription}`
             // );
 
             // const bannerPrompt = await getImagePrompt(
             //     runtime,
-            //     `${cachedData.imageDescription}`
+            //     `banner style image ${imageDescription}`
             // );
+
+            // elizaLogger.info("[CREATE_BURST_TOKEN] logoPrompt", logoPrompt);
 
             const tokenLogoResult = await generateImage(
                 {
                     hideWatermark: true,
-                    prompt: `logo for (${cachedData.symbol}) token - ${cachedData.imageDescription}`,
+                    prompt: `image for ${cachedData.name} (${cachedData.symbol}) token - ${imageDescription}`,
                     width: 256,
                     height: 256,
                     count: 1,
@@ -111,7 +168,7 @@ export default {
             const bannerImageResult = await generateImage(
                 {
                     hideWatermark: true,
-                    prompt: `banner for (${cachedData.symbol}) token - ${cachedData.imageDescription}`,
+                    prompt: `banner style image for ${cachedData.name} (${cachedData.symbol}) token - ${imageDescription}`,
                     width: 1500,
                     height: 500,
                     count: 1,
@@ -208,6 +265,8 @@ export default {
                 content: { cachedData },
             });
 
+            // Clear the cached data after the token has been created
+            await runtime.cacheManager.delete(cacheKey);
             return false;
         }
     },

@@ -195,7 +195,7 @@ export const BURST_TOKEN_FIELD_GUIDANCE: {
     },
     burstAmount: {
         description: "The amount of Avax required for tokens to Burst",
-        valid: "50-2000 with increments of 5. 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 180, 185, 190, 195, 2000. 'Amount 350', 'Burst 200', 'Bond 325'",
+        valid: "50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 180, 185, 190, 195, 2000",
         invalid:
             "4, 2001, 2005, 2006, 2007, 2008, 2009, 2010, 3000, -1, 0, 45.5",
         instructions:
@@ -218,12 +218,12 @@ export const BURST_TOKEN_FIELD_GUIDANCE: {
             "Extract the reward dex of the token from the user's message only when the user directly states the token reward dex",
     },
     creatorAddress: {
-        description: "The address of the creator of the token",
+        description: "The EVM wallet address of the creator of the token",
         valid: "0x1234567890123456789012345678901234567890",
         invalid:
             "0x1234567890123456789012345678901234567890123456789012345678901234",
         instructions:
-            "Extract the creator address of the token from the user's message only when the user directly states the token creator address",
+            "Extract the creator address of the token from the user's message only when the user directly states the token creator address. It must be a valid EVM wallet address.",
     },
     website: {
         description: "The website of the token",

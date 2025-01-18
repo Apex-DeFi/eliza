@@ -95,7 +95,7 @@ export const apexCreateBurstTokenProvider: Provider = {
                 return "";
             }
 
-            elizaLogger.debug("knownFields", knownFields);
+            elizaLogger.info("knownFields", knownFields);
 
             let response = "Create Burst Token Status:\n\n";
 
@@ -107,6 +107,7 @@ export const apexCreateBurstTokenProvider: Provider = {
 
             const missingRequiredFields = getMissingRequiredFields(cachedData);
             // const missingOptionalFields = getMissingOptionalFields(cachedData);
+            elizaLogger.info("missingRequiredFields", missingRequiredFields);
 
             // Check if user is asking for detailed guidance
             const isAskingForHelp = /what|how|explain|help|guide/i.test(
@@ -139,6 +140,21 @@ export const apexCreateBurstTokenProvider: Provider = {
                         response += `${fieldName}:\n`;
                         response += `- ${guidance.description}\n`;
                         response += `- Example: ${guidance.valid}\n`;
+
+                        // Add clear instructions for the agent
+                        response += "Agent Instructions:\n";
+                        response +=
+                            "1. Present the above lists of information to the user ALL at once.\n";
+                        response +=
+                            "2. Ask the user to provide ANY or ALL of the missing information.\n";
+                        response +=
+                            "3. Extract information from user responses when clearly stated.\n";
+                        response +=
+                            "4. After each user response, show updated status with remaining missing fields.\n";
+                        response +=
+                            "5. Verify extracted information matches requirements before storing.\n";
+                        response +=
+                            "6. Inform user they must explicitly state the necessary information for each field.\n";
                     });
                 }
                 response += "\n";
@@ -151,21 +167,21 @@ export const apexCreateBurstTokenProvider: Provider = {
             }
 
             if (missingRequiredFields.length === 0) {
-                if (!cachedData.isConfirmed) {
-                    cachedData.hasRequestedConfirmation = true;
-                    await runtime.cacheManager.set(cacheKey, cachedData, {
-                        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
-                    });
+                // if (!cachedData.isConfirmed) {
+                elizaLogger.info("Requesting confirmation");
+                cachedData.hasRequestedConfirmation = true;
+                await runtime.cacheManager.set(cacheKey, cachedData, {
+                    expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
+                });
 
-                    response +=
-                        "Status: ✓ All necessary information collected.\n";
-                    response += "Please review the details above!\n";
-                    response +=
-                        "Type 'confirm' to create your token or 'cancel' to start over.\n";
-                } else {
-                    response +=
-                        "Status: ✓ Token creation confirmed! Please wait for the token to be created...\n";
-                }
+                response += "Status: ✓ All necessary information collected.\n";
+                response += "Please review the details above!\n";
+                response +=
+                    "Type 'confirm' to create your token or 'cancel' to start over.\n";
+                // } else {
+                //     response +=
+                //         "Status: ✓ Token creation confirmed! Please wait for the token to be created...\n";
+                // }
             }
 
             return response;

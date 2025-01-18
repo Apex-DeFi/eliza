@@ -13,32 +13,7 @@ import {
     emptyCreateBurstTokenData,
 } from "../types/apex";
 import { z } from "zod";
-// import { createApexBurstToken } from "../utils/apexBurst";
-
-const canBeConfirmed = (data: ApexCreateBurstTokenData) => {
-    const totalAllocation = data.dexAllocations?.reduce(
-        (acc, dex) => acc + dex.allocation,
-        0
-    );
-
-    if (
-        data.name &&
-        data.symbol &&
-        data.description &&
-        data.totalSupply &&
-        data.burstAmount &&
-        data.dexAllocations &&
-        data.dexAllocations.length > 0 &&
-        data.dexAllocations.every((dex) => dex.dex !== undefined) && // dex is a valid enum value
-        data.dexAllocations.every((dex) => dex.allocation !== undefined) && // allocation is a valid number
-        totalAllocation === 10000 && // total allocation is 100%
-        data.rewardDex && // reward dex is a valid enum value
-        data.creatorAddress
-    ) {
-        return true;
-    }
-    return false;
-};
+import { canBeConfirmed } from "../utils/apexBurst";
 
 export const apexConfirmBurstTokenEvaluator: Evaluator = {
     name: "CONFIRM_BURST_TOKEN",

@@ -19,6 +19,7 @@ import {
 } from "../providers/apexCreateBurstToken";
 import { ModelClass } from "@elizaos/core";
 import { burstTokenSchema } from "../types/apexSchemas";
+import { getBurstTokenDataTemplate } from "../templates/apex";
 
 const isDataComplete = (data: ApexCreateBurstTokenData) => {
     return (
@@ -60,7 +61,10 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 )) || { ...emptyCreateBurstTokenData };
 
             // Run if the data is incomplete and the user hasn't confirmed the creation
-            return !isDataComplete(cachedData) && !cachedData.isConfirmed;
+            return (
+                !isDataComplete(cachedData) &&
+                !cachedData.hasRequestedConfirmation
+            );
         } catch (error) {
             elizaLogger.error(
                 `Error in apexGetBurstTokenDataEvaluator: ${error.message}`
@@ -81,48 +85,9 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 cachedData,
             });
 
-            const burstTokenDataExtractionTemplate = `
-Analyze the following conversation and extract the token details.
-Only extract information (name, symbol, totalSupply, tradingFee, maxWalletPercent, image description, burst amount, dex allocations, creator) when it is explicitly and clearly stated by the user about a token they want to create.
-
-IMPORTANT: If the user indicates they don't want to add any more information (e.g., "no more", "no extras", "skip", "no thanks", etc.) or they are confirming or cancelling the token creation (e.g., "yes", "confirm", "launch", "create", "let's do it", "I'm ready", "make it happen", "let's launch!", "proceed"),
-return an empty object {}. Do not fill in example values under any circumstances.
-
-Conversation:
-${message.content.text}
-
-Return a JSON object containing only the fields where information was clearly found:
-
-\`\`\`json
-{
-    "name": string,
-    "symbol": string,
-    "totalSupply": number,
-    "imageDescription": string,
-    "description": string,
-    "tradingFee": number,
-    "maxWalletPercent": number,
-    "burstAmount": number,
-    "dexAllocations": [
-        {
-            "dex": string,
-            "allocation": number
-        }
-    ],
-    "rewardDex": string,
-    "creatorAddress": string,
-    "website": string,
-    "twitter": string,
-    "telegram": string,
-    "discord": string
-}
-\`\`\`
-
-Only include fields where the information is explicitly and clearly stated by the user.
-Omit fields if the information is unclear, hypothetical, or not explicitly stated.
-
-If the user is confirming or cancelling the token creation, return an empty object {}.
-`;
+            const burstTokenDataExtractionTemplate = getBurstTokenDataTemplate(
+                message.content.text
+            );
 
             const generatedContent = await generateObject({
                 runtime,

@@ -14,7 +14,7 @@ import {
 } from "./utils/constants";
 import { apexGetBurstTokenDataEvaluator } from "./evaluators/apexGetBurstTokenData";
 import { apexCreateBurstTokenProvider } from "./providers/apexCreateBurstToken";
-import { apexConfirmBurstTokenEvaluator } from "./evaluators/apexConfirmBurstToken";
+// import { apexConfirmBurstTokenEvaluator } from "./evaluators/apexConfirmBurstToken";
 import apexCreateBurstToken from "./actions/apexCreateBurstToken";
 
 export const PROVIDER_CONFIG = {
@@ -31,7 +31,7 @@ export const avalanchePlugin: Plugin = {
     actions: [transfer, yakSwap, yakStrategy, apexCreateBurstToken],
     evaluators: [
         apexGetBurstTokenDataEvaluator,
-        apexConfirmBurstTokenEvaluator,
+        // apexConfirmBurstTokenEvaluator,
     ],
     providers: [
         tokensProvider,
