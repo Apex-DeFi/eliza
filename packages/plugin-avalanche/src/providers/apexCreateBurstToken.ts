@@ -32,29 +32,39 @@ export const getBurstTokenDataCacheKey = (
 export const getMissingRequiredFields = (
     cachedData: ApexCreateBurstTokenData
 ): Array<keyof Omit<ApexCreateBurstTokenData, ApexBurstInternalField>> => {
-    return ApexBurstRequiredFields.filter(
-        (field) =>
-            !cachedData[
+    return ApexBurstRequiredFields.filter((field) => {
+        const value =
+            cachedData[
                 field as keyof Omit<
                     ApexCreateBurstTokenData,
                     ApexBurstInternalField
                 >
-            ]
-    );
+            ];
+        return (
+            value === null ||
+            value === undefined ||
+            (typeof value === "string" && value.length === 0)
+        );
+    });
 };
 
 export const getMissingOptionalFields = (
     cachedData: ApexCreateBurstTokenData
 ): Array<keyof Omit<ApexCreateBurstTokenData, ApexBurstInternalField>> => {
-    return ApexBurstOptionalFields.filter(
-        (field) =>
-            !cachedData[
+    return ApexBurstOptionalFields.filter((field) => {
+        const value =
+            cachedData[
                 field as keyof Omit<
                     ApexCreateBurstTokenData,
                     ApexBurstInternalField
                 >
-            ]
-    );
+            ];
+        return (
+            value === null ||
+            value === undefined ||
+            (typeof value === "string" && value.length === 0)
+        );
+    });
 };
 
 export const apexCreateBurstTokenProvider: Provider = {
@@ -65,6 +75,11 @@ export const apexCreateBurstTokenProvider: Provider = {
                 (await runtime.cacheManager.get<ApexCreateBurstTokenData>(
                     cacheKey
                 )) || { ...emptyCreateBurstTokenData };
+
+            elizaLogger.info(
+                "[CREATE_BURST_TOKEN Provider] Getting create burst token data",
+                cachedData
+            );
 
             // Show current information if any exists
             const knownFields = Object.entries(cachedData)
@@ -91,11 +106,15 @@ export const apexCreateBurstTokenProvider: Provider = {
                     message.content.text
                 );
 
+            elizaLogger.info("knownFields", knownFields);
+
+            // If the user is not asking to create a token and there is no known information, return an empty string
             if (!isTokenCreationMessage && knownFields.length === 0) {
+                elizaLogger.info(
+                    "[CREATE_BURST_TOKEN Provider] No known information and not asking to create a token"
+                );
                 return "";
             }
-
-            elizaLogger.info("knownFields", knownFields);
 
             let response = "Create Burst Token Status:\n\n";
 
@@ -166,9 +185,14 @@ export const apexCreateBurstTokenProvider: Provider = {
                 }
             }
 
-            if (missingRequiredFields.length === 0) {
+            if (
+                missingRequiredFields.length === 0 ||
+                cachedData.hasRequestedConfirmation
+            ) {
                 // if (!cachedData.isConfirmed) {
-                elizaLogger.info("Requesting confirmation");
+                elizaLogger.info(
+                    "[CREATE_BURST_TOKEN Provider] Requesting confirmation"
+                );
                 cachedData.hasRequestedConfirmation = true;
                 await runtime.cacheManager.set(cacheKey, cachedData, {
                     expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week

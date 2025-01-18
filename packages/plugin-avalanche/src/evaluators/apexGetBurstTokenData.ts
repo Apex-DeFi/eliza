@@ -20,6 +20,7 @@ import {
 import { ModelClass } from "@elizaos/core";
 import { burstTokenSchema } from "../types/apexSchemas";
 import { getBurstTokenDataTemplate } from "../templates/apex";
+// import { canBeConfirmed } from "../utils/apexBurst";
 
 const isDataComplete = (data: ApexCreateBurstTokenData) => {
     return (
@@ -92,7 +93,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
             const generatedContent = await generateObject({
                 runtime,
                 context: burstTokenDataExtractionTemplate,
-                modelClass: ModelClass.MEDIUM,
+                modelClass: ModelClass.LARGE,
                 schema: burstTokenSchema,
                 mode: "auto",
             });
@@ -117,23 +118,40 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
 
                 // Need to update values even if they are already set in the cached data
                 // in the event that the user changes their mind
-                if (value) {
-                    // TypeScript will ensure field is a valid key of ApexCreateBurstTokenData
+                if (
+                    value !== null &&
+                    value !== undefined &&
+                    (typeof value !== "string" || value.length > 0)
+                ) {
                     cachedData[field] = value;
                     dataUpdated = true;
                 }
             });
 
             if (dataUpdated) {
+                // const canBeConfirmedResult = canBeConfirmed(cachedData);
+                // elizaLogger.log(
+                //     "[GET_BURST_TOKEN_DATA Evaluator] canBeConfirmedResult",
+                //     {
+                //         canBeConfirmedResult,
+                //     }
+                // );
+                // if (canBeConfirmedResult) {
+                //     elizaLogger.info(
+                //         "[GET_BURST_TOKEN_DATA Evaluator] Requesting confirmation"
+                //     );
+                //     cachedData.hasRequestedConfirmation = true;
+                // }
+
                 cachedData.lastUpdated = Date.now();
                 await runtime.cacheManager.set(cacheKey, cachedData, {
                     expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
                 });
-            }
 
-            elizaLogger.log("Evaluator updated cached data", {
-                cachedData,
-            });
+                elizaLogger.log("Evaluator updated cached data", {
+                    cachedData,
+                });
+            }
         } catch (error) {
             elizaLogger.error(
                 `Error in apexGetBurstTokenDataEvaluator: ${error.message}`
@@ -176,6 +194,37 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
         },
         {
             context: "Partial information provided",
+            messages: [
+                {
+                    user: "{{user1}}",
+                    content: {
+                        text: "I'm thinking of launching a token called Sharky with 2% trading fee. Not sure about other details yet but the symbol will be SHARK. Amount is 115.",
+                    },
+                },
+            ],
+            outcome: `{
+                "name": "Sharky",
+                "symbol": "SHARK",
+                "tradingFee": 200,
+                "burstAmount": 115
+            }`,
+        },
+        {
+            context: "Partial information with just image description",
+            messages: [
+                {
+                    user: "{{user1}}",
+                    content: {
+                        text: "image description a logo of a shark with the word Sharky in the middle",
+                    },
+                },
+            ],
+            outcome: `{
+                "imageDescription": "a logo of a shark with the word Sharky in the middle"
+            }`,
+        },
+        {
+            context: "Partial information with additional details",
             messages: [
                 {
                     user: "{{user1}}",

@@ -12,9 +12,12 @@ import {
 } from "@elizaos/core";
 import { validateAvalancheConfig } from "../environment";
 import { emptyCreateBurstTokenData, TokenMetadata } from "../types/apex";
-import { getBurstTokenDataCacheKey } from "../providers/apexCreateBurstToken";
+import {
+    getBurstTokenDataCacheKey,
+    getMissingRequiredFields,
+} from "../providers/apexCreateBurstToken";
 import { ApexCreateBurstTokenData } from "../types/apex";
-import { canBeConfirmed, createApexBurstToken } from "../utils/apexBurst";
+import { createApexBurstToken } from "../utils/apexBurst";
 import { uploadImageToIPFS, uploadMetadataToIPFS } from "../utils/pinata";
 import { PinataSDK } from "pinata-web3";
 import { getConfirmationTemplate } from "../templates/apex";
@@ -52,12 +55,19 @@ export default {
                     cacheKey
                 )) || { ...emptyCreateBurstTokenData };
 
+            elizaLogger.info(
+                "[CREATE_BURST_TOKEN Validate] cachedData",
+                cachedData
+            );
+
+            const missingRequiredFields = getMissingRequiredFields(cachedData);
+
             const result =
                 cachedData.hasRequestedConfirmation &&
                 !cachedData.isConfirmed &&
-                canBeConfirmed(cachedData);
+                missingRequiredFields.length === 0;
             elizaLogger.log(
-                `[CREATE_BURST_TOKEN] hasRequestedConfirmation: ${cachedData.hasRequestedConfirmation}` //, isConfirmed: ${cachedData.isConfirmed}`
+                `[CREATE_BURST_TOKEN] hasRequestedConfirmation: ${cachedData.hasRequestedConfirmation} isConfirmed: ${cachedData.isConfirmed} missingRequiredFields: ${missingRequiredFields.length}`
             );
 
             return result;

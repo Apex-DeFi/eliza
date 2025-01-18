@@ -60,7 +60,7 @@ async function validateQuery(
         // Merge any additional general queries from config
         if (gitbookConfig?.keywords?.generalQueries) {
             keywords.generalQueries = [
-                ...keywords.generalQueries,
+                // ...keywords.generalQueries,
                 ...gitbookConfig.keywords.generalQueries,
             ];
         }

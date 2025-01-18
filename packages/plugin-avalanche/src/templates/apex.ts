@@ -28,9 +28,25 @@ Return a JSON object with isConfirmed field set to true or false based on the an
 export const getBurstTokenDataTemplate = (text: string) => {
     return `
 Analyze the following conversation and extract the token details.
-Only extract information when it is explicitly and clearly stated by the user about a token they want to create.
 
 CRITICAL VALIDATION RULES:
+MOST IMPORTANT: NEVER generate or insert ANY default, example, or placeholder values. ONLY extract information that was EXPLICITLY stated by the user in their message.
+
+1. ZERO HALLUCINATION POLICY:
+   - NEVER generate ANY default, example, or placeholder values
+   - NEVER include fields unless they were EXPLICITLY mentioned in the user's message
+   - NEVER infer or assume values
+   - NEVER copy values from examples into the output
+   - If unsure about a value, exclude it completely
+   - Return {} if user is just asking questions or speaking hypothetically
+
+2. EXTRACTION RULES:
+   - Only extract information from the CURRENT message
+   - Ignore all previous context or examples
+   - If a field isn't explicitly stated, DO NOT include it
+   - Return empty object {} for vague statements like "I want to create a token"
+   - Verify that the extracted information meets ALL validation rules before storing it
+
 1. Creator Address:
    - MUST be exactly 42 characters (0x + 40 hex characters)
    - MUST start with "0x"
@@ -52,8 +68,10 @@ CRITICAL VALIDATION RULES:
 
 4. Burst Amount:
    - MUST be a multiple of 5
-   - Can be between 50 and 2000
+   - Minimum: 50
+   - Maximum: 2000
    - Examples: 50, 55, 60, 65, ... 195, 200
+   - May or may not have 'AVAX' or 'Avax' at the end of the number
    - Can be null or undefined if not provided
    - DO NOT include if not meeting these criteria
 
@@ -68,41 +86,56 @@ CRITICAL VALIDATION RULES:
    - Can be null or undefined if not provided
    - DO NOT include if not meeting these criteria
 
-   7. totalSupply:
+7. totalSupply:
    - MUST be a positive number
    - Examples (User might say): 1000000, 1000000000, 1million, 1billion, 314 million
    - Can be null or undefined if not provided
    - DO NOT include if not meeting these criteria
 
-IMPORTANT: If the user indicates they don't want to add any more information (e.g., "no more", "no extras", "skip", "no thanks", etc.) or they are confirming or cancelling the token creation (e.g., "yes", "confirm", "launch", "create", "let's do it", "I'm ready", "make it happen", "let's launch!", "proceed"), return an empty object {}. Do not fill in example values under any circumstances.
+User message: "I want to create a token"
+Correct output: {}  // Because no specific details were provided
+
+User message: "Let's call it MyToken"
+Correct output: {"name": "MyToken"}  // ONLY include the name, nothing else
+
+User message: "Trading fee should be 2.5% and max wallet 5%"
+Correct output: {"tradingFee": 250, "maxWalletPercent": 500}  // ONLY these two fields
+
+BAD BEHAVIOR TO AVOID:
+- DON'T include any fields not explicitly mentioned
+- DON'T generate example or default values
+- DON'T include social media unless specifically provided
+- DON'T assume any allocations or amounts
+- DON'T copy values from examples
 
 Conversation:
 ${text}
 
-Return a JSON object containing only the fields where information was clearly found AND meets all validation rules:
+Return a JSON object containing ONLY fields that were EXPLICITLY stated AND meet all validation rules:
+
 
 \`\`\`json
 {
-    "name": string,
-    "symbol": string,
-    "totalSupply": number,
-    "imageDescription": string,
-    "description": string,
-    "tradingFee": number,
-    "maxWalletPercent": number,
-    "burstAmount": number,
+    "name": string | undefined,
+    "symbol": string | undefined,
+    "totalSupply": number | undefined,
+    "imageDescription": string | undefined,
+    "description": string | undefined,
+    "tradingFee": number | undefined,
+    "maxWalletPercent": number | undefined,
+    "burstAmount": number | undefined,
     "dexAllocations": [
         {
             "dex": string,
             "allocation": number
         }
-    ],
-    "rewardDex": string,
-    "creatorAddress": string,
-    "website": string,
-    "twitter": string,
-    "telegram": string,
-    "discord": string
+    ] | undefined,
+    "rewardDex": string | undefined,
+    "creatorAddress": string | undefined,
+    "website": string | undefined,
+    "twitter": string | undefined,
+    "telegram": string | undefined,
+    "discord": string | undefined
 }
 \`\`\`
 

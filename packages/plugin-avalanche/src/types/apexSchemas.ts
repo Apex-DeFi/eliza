@@ -29,6 +29,15 @@ export const burstTokenSchema = z
                 z.number().optional()
             )
             .describe("The total supply of the token"),
+        imageDescription: z
+            .preprocess(
+                (val) =>
+                    val === null || val === undefined || val === ""
+                        ? undefined
+                        : val,
+                z.string().optional()
+            )
+            .describe("The description of the image for the token"),
         description: z
             .preprocess(
                 (val) =>
