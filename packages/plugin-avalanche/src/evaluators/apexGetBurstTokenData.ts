@@ -170,7 +170,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "I want to create a token called Apex Rewards with symbol APR. Total supply should be 1000000 tokens. Set trading fee to 2.5%, max wallet to 5%. Allocate 60% to APEX as reward pool, 20% to JOE, and 20% to PHARAOH. Burst amount is 325. Website is apexrewards.io, Twitter @apexrewards, Telegram @apexrewards_tg, Discord apexrewards. Here's my creator address: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e. Description: First community-driven rewards token on Apex. Image Description: a logo of a shark with the word Apex Rewards in the middle",
+                        text: "I want to create a token called Apex Rewards with symbol APR. Total supply should be 1000000 tokens. Set trading fee to 2.5%, max wallet to 5%. Allocate 60% to APEX as reward pool, 20% to JOE, and 20% to PHARAOH. Burst amount is 325. Website is apexrewards.io, Twitter @apexrewards, Telegram @apexrewards_tg, Discord apexrewards. Here's my creator address: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e. Description: First community-driven rewards token on Apex. Image Prompt: a logo of a shark with the word Apex Rewards in the middle",
                     },
                 },
             ],
@@ -178,7 +178,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 "name": "Apex Rewards",
                 "symbol": "APR",
                 "totalSupply": 1000000,
-                "imageDescription": "a logo of a shark with the word Apex Rewards in the middle",
+                "imagePrompt": "a logo of a shark with the word Apex Rewards in the middle",
                 "description": "First community-driven rewards token on Apex",
                 "tradingFee": 250,
                 "maxWalletPercent": 500,
@@ -215,17 +215,17 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
             }`,
         },
         {
-            context: "Partial information with just image description",
+            context: "Partial information with just image prompt",
             messages: [
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "image description a logo of a shark with the word Sharky in the middle",
+                        text: "image prompt a logo of a shark with the word Sharky in the middle",
                     },
                 },
             ],
             outcome: `{
-                "imageDescription": "a logo of a shark with the word Sharky in the middle"
+                "imagePrompt": "a logo of a shark with the word Sharky in the middle"
             }`,
         },
         {
@@ -328,7 +328,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "Launch token GameFi Hub (GFH). Trading fee 2.5%, max wallet 4.25%. Split 50% APEX (reward), 25% each JOE and PANGOLIN. Image Description: a logo of a shark with the word GameFi Hub in the middle. Description: GameFi Hub is the ultimate gaming token. Twitter @gamefihub, Telegram @gfhub",
+                        text: "Launch token GameFi Hub (GFH). Trading fee 2.5%, max wallet 4.25%. Split 50% APEX (reward), 25% each JOE and PANGOLIN. Image Prompt: a logo of a shark with the word GameFi Hub in the middle. Description: GameFi Hub is the ultimate gaming token. Twitter @gamefihub, Telegram @gfhub",
                     },
                 },
             ],
@@ -337,7 +337,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 "symbol": "GFH",
                 "tradingFee": 250,
                 "maxWalletPercent": 425,
-                "imageDescription": "a logo of a shark with the word GameFi Hub in the middle",
+                "imagePrompt": "a logo of a shark with the word GameFi Hub in the middle",
                 "description": "GameFi Hub is the ultimate gaming token",
                 "twitter": "@gamefihub",
                 "telegram": "@gfhub",
@@ -367,7 +367,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "Creating new token DigiDragon (DDRG). Trading fee 3%, max wallet 2.5%. Allocations: 60% APEX as reward, 20% JOE, 20% PANGOLIN. Image Description: a logo of a dragon with the word DigiDragon in the middle",
+                        text: "Creating new token DigiDragon (DDRG). Trading fee 3%, max wallet 2.5%. Allocations: 60% APEX as reward, 20% JOE, 20% PANGOLIN. Image Prompt: a logo of a dragon with the word DigiDragon in the middle",
                     },
                 },
             ],
@@ -376,7 +376,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 "symbol": "DDRG",
                 "tradingFee": 300,
                 "maxWalletPercent": 250,
-                "imageDescription": "a logo of a dragon with the word DigiDragon in the middle",
+                "imagePrompt": "a logo of a dragon with the word DigiDragon in the middle",
                 "dexAllocations": [
                     { "dex": "APEX", "allocation": 6000 },
                     { "dex": "JOE", "allocation": 2000 },
@@ -386,12 +386,12 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
             }`,
         },
         {
-            context: "Token creation with image description",
+            context: "Token creation with image prompt",
             messages: [
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "Let's create token CyberPunk (PUNK). 2% trading fee, 3% max wallet. Split 40% APEX (reward), 30% each for JOE and PANGOLIN. Image Description: a logo of a shark with the word CyberPunk in the middle",
+                        text: "Let's create token CyberPunk (PUNK). 2% trading fee, 3% max wallet. Split 40% APEX (reward), 30% each for JOE and PANGOLIN. Image Prompt: a logo of a shark with the word CyberPunk in the middle",
                     },
                 },
             ],
@@ -400,7 +400,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 "symbol": "PUNK",
                 "tradingFee": 200,
                 "maxWalletPercent": 300,
-                "imageDescription": "a logo of a shark with the word CyberPunk in the middle",
+                "imagePrompt": "a logo of a shark with the word CyberPunk in the middle",
                 "dexAllocations": [
                     { "dex": "APEX", "allocation": 4000 },
                     { "dex": "JOE", "allocation": 3000 },
@@ -410,12 +410,12 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
             }`,
         },
         {
-            context: "Token creation with image description",
+            context: "Token creation with image prompt",
             messages: [
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "Creating MetaWars token (MWAR). Fee 2.5%, max wallet 4%. 45% APEX (reward), 30% JOE, 25% PANGOLIN. Image Description: a logo of a shark with the word MetaWars in the middle",
+                        text: "Creating MetaWars token (MWAR). Fee 2.5%, max wallet 4%. 45% APEX (reward), 30% JOE, 25% PANGOLIN. Image Prompt: a logo of a shark with the word MetaWars in the middle",
                     },
                 },
             ],
@@ -424,7 +424,7 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 "symbol": "MWAR",
                 "tradingFee": 250,
                 "maxWalletPercent": 400,
-                "imageDescription": "a logo of a shark with the word MetaWars in the middle",
+                "imagePrompt": "a logo of a shark with the word MetaWars in the middle",
                 "dexAllocations": [
                     { "dex": "APEX", "allocation": 4500 },
                     { "dex": "JOE", "allocation": 3000 },

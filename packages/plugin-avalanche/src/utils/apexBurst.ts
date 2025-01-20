@@ -15,8 +15,14 @@ import {
     zeroAddress,
 } from "viem";
 import { burstFactoryAbi } from "../abi";
-import { ApexCreateBurstTokenData, CurveDetails } from "../types/apex";
-import { getMissingRequiredFields } from "../providers/apexCreateBurstToken";
+import {
+    ApexBurstInternalField,
+    ApexBurstOptionalFields,
+    ApexBurstRequiredFields,
+    ApexCreateBurstTokenData,
+    BURST_TOKEN_FIELD_GUIDANCE,
+    CurveDetails,
+} from "../types/apex";
 
 export const canBeConfirmed = (data: ApexCreateBurstTokenData) => {
     const totalAllocation = data.dexAllocations?.reduce(
@@ -281,9 +287,9 @@ const getCurveV2Details = async (
 
 export async function getImagePrompt(
     runtime: IAgentRuntime,
-    imageDescription: string
+    imagePrompt: string
 ) {
-    const CONTENT = imageDescription;
+    const CONTENT = imagePrompt;
     const IMAGE_SYSTEM_PROMPT = `You are an expert in writing prompts for AI art generation. You excel at creating detailed and creative visual descriptions. Incorporating specific elements naturally. Always aim for clear, descriptive language that generates a creative picture. Your output should only contain the description of the image contents, but NOT an instruction like "create an image that..."`;
     const STYLE = "futuristic with vibrant colors";
 
@@ -338,3 +344,56 @@ Ensure that your prompt is detailed, vivid, and incorporates all the elements me
         customSystemPrompt: IMAGE_SYSTEM_PROMPT,
     });
 }
+
+// Simplified guidance to reduce token usage
+export const getMinimalFieldGuidance = (
+    field: keyof typeof BURST_TOKEN_FIELD_GUIDANCE
+) => ({
+    description: BURST_TOKEN_FIELD_GUIDANCE[field].description,
+    valid: BURST_TOKEN_FIELD_GUIDANCE[field].valid.split(".")[0], // Only first example
+});
+
+export const getBurstTokenDataCacheKey = (
+    runtime: IAgentRuntime,
+    userId: string
+): string => {
+    return `${runtime.agentId}/${userId}/burstTokenData`;
+};
+
+export const getMissingRequiredFields = (
+    cachedData: ApexCreateBurstTokenData
+): Array<keyof Omit<ApexCreateBurstTokenData, ApexBurstInternalField>> => {
+    return ApexBurstRequiredFields.filter((field) => {
+        const value =
+            cachedData[
+                field as keyof Omit<
+                    ApexCreateBurstTokenData,
+                    ApexBurstInternalField
+                >
+            ];
+        return (
+            value === null ||
+            value === undefined ||
+            (typeof value === "string" && value.length === 0)
+        );
+    });
+};
+
+export const getMissingOptionalFields = (
+    cachedData: ApexCreateBurstTokenData
+): Array<keyof Omit<ApexCreateBurstTokenData, ApexBurstInternalField>> => {
+    return ApexBurstOptionalFields.filter((field) => {
+        const value =
+            cachedData[
+                field as keyof Omit<
+                    ApexCreateBurstTokenData,
+                    ApexBurstInternalField
+                >
+            ];
+        return (
+            value === null ||
+            value === undefined ||
+            (typeof value === "string" && value.length === 0)
+        );
+    });
+};

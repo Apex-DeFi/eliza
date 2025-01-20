@@ -15,9 +15,9 @@ import {
     // ApexBurstOptionalFields,
     ApexCreateBurstTokenData,
 } from "../types/apex";
-import { getMissingRequiredFields } from "../providers/apexCreateBurstToken";
 import { burstTokenSchema } from "../types/apexSchemas";
 import { validateAvalancheConfig } from "../environment";
+import { getMissingRequiredFields } from "../utils/apexBurst";
 
 // const apexCreateTokenSchema = z.object({
 //     // Required fields
@@ -81,10 +81,10 @@ import { validateAvalancheConfig } from "../environment";
 //         .describe(
 //             "The maximum wallet percent for the token in basis points (10000 = 100%). 0-10000"
 //         ),
-//     imageDescription: z
+//     imagePrompt: z
 //         .string()
 //         .optional()
-//         .describe("The description of the image for the token"),
+//         .describe("The prompt for the image for the token"),
 //     website: z.string().optional().describe("The website of the token"),
 //     twitter: z.string().optional().describe("The twitter of the token"),
 //     telegram: z.string().optional().describe("The telegram of the token"),
@@ -312,7 +312,7 @@ export default {
             {
                 user: "{{user2}}",
                 content: {
-                    text: "Here are all the required fields for creating a new token on APEX.\n\nName: The name of the token\nSymbol: The symbol of the token\nTotal Supply: The total supply of the token\nDescription: The description of the token\nBurst Amount: The amount of avax required to burst the token\nDEX Allocations: The DEXs and their associated allocation\nReward Dex: The DEX for which LP tokens will be used as rewards for single-sided staking\nCreator Address: The address of the creator of the token. Must be a valid EVM address\n\nOptionally you can provide a trading fee, max wallet percent, image description, website, twitter, telegram, and discord.",
+                    text: "Here are all the required fields for creating a new token on APEX.\n\nName: The name of the token\nSymbol: The symbol of the token\nTotal Supply: The total supply of the token\nDescription: The description of the token\nBurst Amount: The amount of avax required to burst the token\nDEX Allocations: The DEXs and their associated allocation\nReward Dex: The DEX for which LP tokens will be used as rewards for single-sided staking\nCreator Address: The address of the creator of the token. Must be a valid EVM address\n\nOptionally you can provide a trading fee, max wallet percent, image prompt, website, twitter, telegram, and discord.",
                     action: "CREATE_BURST_TOKEN",
                 },
             },

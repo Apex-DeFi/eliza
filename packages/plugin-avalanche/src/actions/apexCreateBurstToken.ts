@@ -12,12 +12,12 @@ import {
 } from "@elizaos/core";
 import { validateAvalancheConfig } from "../environment";
 import { emptyCreateBurstTokenData, TokenMetadata } from "../types/apex";
-import {
-    getBurstTokenDataCacheKey,
-    getMissingRequiredFields,
-} from "../providers/apexCreateBurstToken";
 import { ApexCreateBurstTokenData } from "../types/apex";
-import { createApexBurstToken } from "../utils/apexBurst";
+import {
+    createApexBurstToken,
+    getMissingRequiredFields,
+    getBurstTokenDataCacheKey,
+} from "../utils/apexBurst";
 import { uploadImageToIPFS, uploadMetadataToIPFS } from "../utils/pinata";
 import { PinataSDK } from "pinata-web3";
 import { getConfirmationTemplate } from "../templates/apex";
@@ -151,17 +151,17 @@ export default {
                 }
             }
 
-            const imageDescription =
-                cachedData.imageDescription ?? cachedData.description;
+            const imagePrompt =
+                cachedData.imagePrompt ?? cachedData.description;
 
             // const logoPrompt = await getImagePrompt(
             //     runtime,
-            //     `${imageDescription}`
+            //     `${imagePrompt}`
             // );
 
             // const bannerPrompt = await getImagePrompt(
             //     runtime,
-            //     `banner style image ${imageDescription}`
+            //     `banner style image ${imagePrompt}`
             // );
 
             // elizaLogger.info("[CREATE_BURST_TOKEN] logoPrompt", logoPrompt);
@@ -169,7 +169,7 @@ export default {
             const tokenLogoResult = await generateImage(
                 {
                     hideWatermark: true,
-                    prompt: `image for ${cachedData.name} (${cachedData.symbol}) token - ${imageDescription}`,
+                    prompt: `image for ${cachedData.name} (${cachedData.symbol}) token - ${imagePrompt}`,
                     width: 256,
                     height: 256,
                     count: 1,
@@ -180,7 +180,7 @@ export default {
             const bannerImageResult = await generateImage(
                 {
                     hideWatermark: true,
-                    prompt: `banner style image for ${cachedData.name} (${cachedData.symbol}) token - ${imageDescription}`,
+                    prompt: `banner style image for ${cachedData.name} (${cachedData.symbol}) token - ${imagePrompt}`,
                     width: 1500,
                     height: 500,
                     count: 1,

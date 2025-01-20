@@ -34,7 +34,7 @@ export const ApexBurstRequiredFields = [
 export const ApexBurstOptionalFields = [
     "tradingFee",
     "maxWalletPercent",
-    "imageDescription",
+    "imagePrompt",
     // "banner",
     // "swapSound",
     "website",
@@ -73,7 +73,7 @@ export interface ApexCreateBurstTokenData {
     // Optional fields
     tradingFee: number | undefined;
     maxWalletPercent: number | undefined;
-    imageDescription: string | undefined;
+    imagePrompt: string | undefined;
     // banner: string | undefined;
     // swapSound: string | undefined;
     // Optional fields for social media
@@ -92,7 +92,7 @@ export const emptyCreateBurstTokenData: ApexCreateBurstTokenData = {
     name: undefined,
     symbol: undefined,
     totalSupply: undefined,
-    imageDescription: undefined,
+    imagePrompt: undefined,
     // banner: undefined,
     // swapSound: undefined,
     description: undefined,
@@ -156,13 +156,13 @@ export const BURST_TOKEN_FIELD_GUIDANCE: {
         instructions:
             "Extract the total supply of the token from the user's message only when the user directly states the token total supply",
     },
-    imageDescription: {
-        description: "The description of the image of the token",
-        valid: "The description of the image of the token must be a string",
+    imagePrompt: {
+        description: "The prompt for the image of the token",
+        valid: "The prompt for the image of the token must be a string",
         invalid:
             "A link or url to a website, twitter, telegram, discord, or other social media.",
         instructions:
-            "Extract the description of the image of the token from the user's message only when the user directly states the token image description",
+            "Extract the prompt for the image of the token from the user's message only when the user directly states the token image prompt",
     },
     // image: {
     //     description:

@@ -5,67 +5,17 @@ import {
     type Memory,
 } from "@elizaos/core";
 import {
-    ApexBurstRequiredFields,
-    ApexBurstOptionalFields,
     ApexCreateBurstTokenData,
     BURST_TOKEN_FIELD_GUIDANCE,
     emptyCreateBurstTokenData,
     ApexBurstInternalFields,
     ApexBurstInternalField,
 } from "../types/apex";
-
-// Simplified guidance to reduce token usage
-const getMinimalFieldGuidance = (
-    field: keyof typeof BURST_TOKEN_FIELD_GUIDANCE
-) => ({
-    description: BURST_TOKEN_FIELD_GUIDANCE[field].description,
-    valid: BURST_TOKEN_FIELD_GUIDANCE[field].valid.split(".")[0], // Only first example
-});
-
-export const getBurstTokenDataCacheKey = (
-    runtime: IAgentRuntime,
-    userId: string
-): string => {
-    return `${runtime.agentId}/${userId}/burstTokenData`;
-};
-
-export const getMissingRequiredFields = (
-    cachedData: ApexCreateBurstTokenData
-): Array<keyof Omit<ApexCreateBurstTokenData, ApexBurstInternalField>> => {
-    return ApexBurstRequiredFields.filter((field) => {
-        const value =
-            cachedData[
-                field as keyof Omit<
-                    ApexCreateBurstTokenData,
-                    ApexBurstInternalField
-                >
-            ];
-        return (
-            value === null ||
-            value === undefined ||
-            (typeof value === "string" && value.length === 0)
-        );
-    });
-};
-
-export const getMissingOptionalFields = (
-    cachedData: ApexCreateBurstTokenData
-): Array<keyof Omit<ApexCreateBurstTokenData, ApexBurstInternalField>> => {
-    return ApexBurstOptionalFields.filter((field) => {
-        const value =
-            cachedData[
-                field as keyof Omit<
-                    ApexCreateBurstTokenData,
-                    ApexBurstInternalField
-                >
-            ];
-        return (
-            value === null ||
-            value === undefined ||
-            (typeof value === "string" && value.length === 0)
-        );
-    });
-};
+import {
+    getBurstTokenDataCacheKey,
+    getMinimalFieldGuidance,
+    getMissingRequiredFields,
+} from "../utils/apexBurst";
 
 export const apexCreateBurstTokenProvider: Provider = {
     get: async (runtime: IAgentRuntime, message: Memory) => {

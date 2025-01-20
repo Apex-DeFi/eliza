@@ -7,7 +7,7 @@ import {
     Memory,
     ModelClass,
 } from "@elizaos/core";
-import { getBurstTokenDataCacheKey } from "../providers/apexCreateBurstToken";
+import { getBurstTokenDataCacheKey } from "../utils/apexBurst";
 import {
     ApexCreateBurstTokenData,
     emptyCreateBurstTokenData,
