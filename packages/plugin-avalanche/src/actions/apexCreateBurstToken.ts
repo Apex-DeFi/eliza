@@ -45,6 +45,7 @@ export default {
         - "Launch it"
         - "Create it"
         - "Proceed"
+        - "Looks good"
     `,
     validate: async (runtime: IAgentRuntime, message: Memory) => {
         try {
@@ -63,11 +64,12 @@ export default {
             const missingRequiredFields = getMissingRequiredFields(cachedData);
 
             const result =
+                cachedData.receivedTokenRequest &&
                 cachedData.hasRequestedConfirmation &&
                 !cachedData.isConfirmed &&
                 missingRequiredFields.length === 0;
             elizaLogger.log(
-                `[CREATE_BURST_TOKEN] hasRequestedConfirmation: ${cachedData.hasRequestedConfirmation} isConfirmed: ${cachedData.isConfirmed} missingRequiredFields: ${missingRequiredFields.length}`
+                `[CREATE_BURST_TOKEN Validate] hasRequestedConfirmation: ${cachedData.hasRequestedConfirmation} isConfirmed: ${cachedData.isConfirmed} missingRequiredFields: ${missingRequiredFields.length} receivedTokenRequest: ${cachedData.receivedTokenRequest} result ${result}`
             );
 
             return result;
@@ -253,8 +255,8 @@ export default {
                 `Name: ${cachedData.name}\n` +
                 `Symbol: ${cachedData.symbol}\n` +
                 `CA: https://snowtrace.io/address/${tokenAddress}\n` +
-                `TX: https://snowtrace.io/tx/${tx}` +
-                `Link: https://apexdefi.xyz/burst/${tokenAddress}`;
+                `TX: https://snowtrace.io/tx/${tx}\n` +
+                `Apex: https://apexdefi.xyz/burst/${tokenAddress}`;
 
             elizaLogger.info("[CREATE_BURST_TOKEN] messageText", messageText);
 

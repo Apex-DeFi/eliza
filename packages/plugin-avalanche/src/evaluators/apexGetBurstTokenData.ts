@@ -62,9 +62,14 @@ export const apexGetBurstTokenDataEvaluator: Evaluator = {
                 )) || { ...emptyCreateBurstTokenData };
 
             // Run if the data is incomplete and the user hasn't confirmed the creation
+            const isDataIncomplete = !isDataComplete(cachedData);
+            elizaLogger.log(
+                `[GET_BURST_TOKEN_DATA Evaluator] isDataIncomplete: ${isDataIncomplete} hasRequestedConfirmation: ${cachedData.hasRequestedConfirmation} receivedTokenRequest: ${cachedData.receivedTokenRequest}`
+            );
             return (
                 !isDataComplete(cachedData) &&
-                !cachedData.hasRequestedConfirmation
+                !cachedData.hasRequestedConfirmation &&
+                cachedData.receivedTokenRequest
             );
         } catch (error) {
             elizaLogger.error(

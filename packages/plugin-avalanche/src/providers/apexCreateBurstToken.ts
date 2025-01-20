@@ -101,20 +101,31 @@ export const apexCreateBurstTokenProvider: Provider = {
                 });
 
             // Check if this is a token creation message
+            // ... existing code ...
             const isTokenCreationMessage =
-                /\b(create|make|launch|start|burst|deploy|mint|build|new)\b.*\b(token|coin)\b/i.test(
+                /\b(create|make|launch|start|burst|deploy|mint|build|new)\b.*?\b(token|coin)\b/i.test(
                     message.content.text
                 );
 
-            elizaLogger.info("knownFields", knownFields);
-
             // If the user is not asking to create a token and there is no known information, return an empty string
-            if (!isTokenCreationMessage && knownFields.length === 0) {
+            if (
+                !isTokenCreationMessage &&
+                knownFields.length === 0 &&
+                !cachedData.receivedTokenRequest
+            ) {
                 elizaLogger.info(
                     "[CREATE_BURST_TOKEN Provider] No known information and not asking to create a token"
                 );
                 return "";
             }
+
+            elizaLogger.info("knownFields", knownFields);
+
+            // receivedTokenRequest is used to determine if the user has asked to create a token
+            cachedData.receivedTokenRequest = true;
+            await runtime.cacheManager.set(cacheKey, cachedData, {
+                expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
+            });
 
             let response = "Create Burst Token Status:\n\n";
 
@@ -202,6 +213,7 @@ export const apexCreateBurstTokenProvider: Provider = {
                 response += "Please review the details above!\n";
                 response +=
                     "Type 'confirm' to create your token or 'cancel' to start over.\n";
+                response += "You MUST ask the user to 'confirm' or 'cancel'.\n";
                 // } else {
                 //     response +=
                 //         "Status: ✓ Token creation confirmed! Please wait for the token to be created...\n";

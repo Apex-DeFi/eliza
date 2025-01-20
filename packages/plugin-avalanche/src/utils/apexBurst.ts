@@ -8,13 +8,14 @@ import {
 } from "@elizaos/core";
 import {
     Address,
+    formatEther,
     isAddress,
     parseEther,
     parseEventLogs,
     zeroAddress,
 } from "viem";
 import { burstFactoryAbi } from "../abi";
-import { ApexCreateBurstTokenData } from "../types/apex";
+import { ApexCreateBurstTokenData, CurveDetails } from "../types/apex";
 import { getMissingRequiredFields } from "../providers/apexCreateBurstToken";
 
 export const canBeConfirmed = (data: ApexCreateBurstTokenData) => {
@@ -52,6 +53,7 @@ export const createApexBurstToken = async (
 ) => {
     const account = getAccount(runtime);
     const publicClient = getPublicClient(runtime);
+    const burstFactoryAddress: Address = APEX_CONFIG.burstFactory as Address;
     elizaLogger.info(
         "[createApexBurstToken] apexBurstTokenData",
         apexBurstTokenData
@@ -117,7 +119,14 @@ export const createApexBurstToken = async (
         "0x0000000000000000000000000000000000000000000000000000000000000000";
 
     const metadataURI = metadataUrl;
-    const curveIndex = 37;
+    // get the curve details
+    const curveDetails = await getCurveV2Details(burstFactoryAddress, runtime);
+    // get the curve index
+    const curveIndex = await getCurveIndex(
+        apexBurstTokenData.burstAmount,
+        curveDetails,
+        2
+    );
 
     // verify that dexAllocations is not empty and that the sum of allocations is 10000
     // also verify that only 1 dex is marked as a reward
@@ -170,7 +179,7 @@ export const createApexBurstToken = async (
 
     const { result, request } = await publicClient.simulateContract({
         account,
-        address: APEX_CONFIG.burstFactory as Address,
+        address: burstFactoryAddress,
         abi: burstFactoryAbi,
         functionName: "burstTokenWithCreator",
         args: params,
@@ -208,6 +217,66 @@ export const createApexBurstToken = async (
         tx: tx,
         tokenAddress: tokenAddress,
     };
+};
+
+const getCurveIndex = async (
+    burstAmount: number,
+    curveDetails: CurveDetails[],
+    curveStyleIndex: number
+): Promise<number> => {
+    if (!curveDetails) return 0;
+    if (curveDetails.length === 0) return 0;
+
+    const curveIndex = curveDetails.find((curveDetail) => {
+        if (curveDetail && curveDetail.avaxAtLaunch) {
+            const formattedAmount = Number(
+                formatEther(curveDetail.avaxAtLaunch)
+            );
+            // Round to the nearest 5
+            const roundedAmount = Math.round(formattedAmount / 5) * 5;
+
+            return (
+                roundedAmount === burstAmount &&
+                curveStyleIndex === curveDetail.curveStyle
+            );
+        }
+        return false;
+    });
+
+    elizaLogger.log("curveIndex", curveIndex);
+    // if no curve is found, return the default curve index (250 Avax - Curve Style 2)
+    return curveIndex?.index || 37;
+};
+
+const getCurveV2Details = async (
+    burstFactoryAddress: Address,
+    runtime: IAgentRuntime
+): Promise<CurveDetails[]> => {
+    const publicClient = getPublicClient(runtime);
+    const data = await publicClient.readContract({
+        address: burstFactoryAddress,
+        abi: burstFactoryAbi,
+        functionName: "getAllCurves",
+    });
+
+    const curveDetails: CurveDetails[] = data.map((curveDetail) => {
+        if (curveDetail) {
+            return {
+                index: curveDetail.index,
+                curveStyle: curveDetail.curveData.curveStyle,
+                distribution: curveDetail.distribution as bigint[],
+                binStepScaleFactor: curveDetail.curveData
+                    .binStepScaleFactor as bigint[],
+                percentOfLP: curveDetail.curveData.percentOfLP as bigint,
+                avaxAtLaunch: curveDetail.curveData.avaxAtLaunch as bigint,
+                basePrice: curveDetail.curveData.basePrice as bigint,
+            };
+        } else {
+            return null;
+        }
+    });
+
+    return curveDetails.filter((curve) => curve !== null);
 };
 
 export async function getImagePrompt(

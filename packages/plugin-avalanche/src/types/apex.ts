@@ -45,18 +45,23 @@ export const ApexBurstOptionalFields = [
 
 export type ApexBurstInternalField = keyof Pick<
     ApexCreateBurstTokenData,
-    "lastUpdated" | "isConfirmed" | "hasRequestedConfirmation"
+    | "lastUpdated"
+    | "isConfirmed"
+    | "hasRequestedConfirmation"
+    | "receivedTokenRequest"
 >;
 
 export const ApexBurstInternalFields = new Set<ApexBurstInternalField>([
     "lastUpdated",
     "isConfirmed",
     "hasRequestedConfirmation",
+    "receivedTokenRequest",
 ]);
 
 // This is the information that is to be gathered from the user to be able to create a burst token
 // Some of these fields are not required, but they are here to make the user experience better
 export interface ApexCreateBurstTokenData {
+    // Required fields
     name: string | undefined;
     symbol: string | undefined;
     totalSupply: number | undefined;
@@ -77,6 +82,7 @@ export interface ApexCreateBurstTokenData {
     telegram: string | undefined;
     discord: string | undefined;
     // Confirmation fields
+    receivedTokenRequest: boolean;
     hasRequestedConfirmation: boolean;
     isConfirmed: boolean;
     lastUpdated: number | undefined;
@@ -100,10 +106,21 @@ export const emptyCreateBurstTokenData: ApexCreateBurstTokenData = {
     twitter: undefined,
     telegram: undefined,
     discord: undefined,
+    receivedTokenRequest: false,
     hasRequestedConfirmation: false,
     isConfirmed: false,
     lastUpdated: undefined,
 };
+
+export type CurveDetails = {
+    index: number;
+    curveStyle?: number;
+    distribution: bigint[];
+    binStepScaleFactor: bigint[];
+    percentOfLP: bigint;
+    avaxAtLaunch: bigint;
+    basePrice: bigint;
+} | null;
 
 export type BurstTokenFieldGuidance = {
     description: string;
@@ -212,8 +229,8 @@ export const BURST_TOKEN_FIELD_GUIDANCE: {
     rewardDex: {
         description:
             "The DEXs LP tokens that will be used as the single sided staking rewards",
-        valid: "APEX, JOE, PHARAOH, PANGOLIN. Must be APEX, JOE, PHARAOH, and/or PANGOLIN. User can only choose one of these.",
-        invalid: "UNISWAP, SUSHI, DEX",
+        valid: "APEX, JOE, PHARAOH, PANGOLIN. User can only choose one of these.",
+        invalid: "UNISWAP, SUSHI, DEX, SushiSwap, Uniswap",
         instructions:
             "Extract the reward dex of the token from the user's message only when the user directly states the token reward dex",
     },
@@ -228,7 +245,7 @@ export const BURST_TOKEN_FIELD_GUIDANCE: {
     website: {
         description: "The website of the token",
         valid: "https://example.com, https://www.example.com, https://www.example.com/subpage",
-        invalid: "example.com, www.example.com, www.example.com/subpage",
+        invalid: "example.com, www.example.com, www.example/subpage",
         instructions:
             "Extract the website of the token from the user's message only when the user directly states the token website",
     },
