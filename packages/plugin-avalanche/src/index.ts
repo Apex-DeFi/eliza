@@ -8,10 +8,6 @@ import {
     APEX_CONFIG,
 } from "./utils/constants";
 import apexCreateToken from "./actions/apexCreateToken";
-// import { apexGetBurstTokenDataEvaluator } from "./evaluators/apexGetBurstTokenData";
-// import { apexCreateBurstTokenProvider } from "./providers/apexCreateBurstToken";
-// import { apexConfirmBurstTokenEvaluator } from "./evaluators/apexConfirmBurstToken";
-// import apexCreateBurstToken from "./actions/apexCreateBurstToken";
 
 export const PROVIDER_CONFIG = {
     TOKEN_ADDRESSES: TOKEN_ADDRESSES,
@@ -25,14 +21,8 @@ export const avalanchePlugin: Plugin = {
     name: "avalanche",
     description: "Avalanche Plugin for Eliza",
     actions: [apexCreateToken],
-    evaluators: [
-        // apexGetBurstTokenDataEvaluator,
-        // apexConfirmBurstTokenEvaluator,
-    ],
-    providers: [
-        walletProvider,
-        // apexCreateBurstTokenProvider,
-    ],
+    evaluators: [],
+    providers: [walletProvider],
 };
 
 export default avalanchePlugin;
