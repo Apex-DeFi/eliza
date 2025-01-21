@@ -5,7 +5,7 @@ export const avalancheEnvSchema = z.object({
     AVALANCHE_PRIVATE_KEY: z
         .string()
         .min(1, "Avalanche private key is required"),
-    AVALANCHE_NETWORK: z.enum(["testnet", "mainnet"]),
+    AVALANCHE_NETWORK: z.enum(["fuji", "avalanche"]),
 });
 
 export type AvalancheConfig = z.infer<typeof avalancheEnvSchema>;

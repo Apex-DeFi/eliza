@@ -1,5 +1,10 @@
-import { getAccount, getPublicClient, getWalletClient } from "./index";
-import { APEX_CONFIG } from "./constants";
+import {
+    getAccount,
+    getNetwork,
+    getPublicClient,
+    getWalletClient,
+} from "./index";
+import { APEX_BURST_FACTORY_ADDRESSES } from "./constants";
 import {
     IAgentRuntime,
     ModelClass,
@@ -59,7 +64,16 @@ export const createApexBurstToken = async (
 ) => {
     const account = getAccount(runtime);
     const publicClient = getPublicClient(runtime);
-    const burstFactoryAddress: Address = APEX_CONFIG.burstFactory as Address;
+    const network = getNetwork(runtime).id === 43113 ? "fuji" : "avalanche";
+    const burstFactoryAddress: Address = APEX_BURST_FACTORY_ADDRESSES[
+        network
+    ] as Address;
+    elizaLogger.info(
+        "[createApexBurstToken] network and burstFactoryAddress",
+        network,
+        burstFactoryAddress
+    );
+
     elizaLogger.info(
         "[createApexBurstToken] apexBurstTokenData",
         apexBurstTokenData

@@ -30,9 +30,14 @@ const TOKEN_MILL_CONFIG = {
     factory: "0x501ee2D4AA611C906F785e10cC868e145183FCE4",
 };
 
-const APEX_CONFIG = {
-    factory: "0x754A0c42C35562eE7a41eb824d14bc1259820f01",
-    burstFactory: "0x2356c411E48BFEfEd9cbD26d8D6BB43c37Dad6bD",
+const APEX_FACTORY_ADDRESSES: Record<string, Address> = {
+    fuji: "0xDc82335F80085458bf25c6cd186d32089CE3533B", // Fuji
+    avalanche: "0x754A0c42C35562eE7a41eb824d14bc1259820f01", // Mainnet
+};
+
+const APEX_BURST_FACTORY_ADDRESSES: Record<string, Address> = {
+    fuji: "0x2356c411E48BFEfEd9cbD26d8D6BB43c37Dad6bD", // Fuji
+    avalanche: "0xBc74A3C24d8aA980445ADc889577E29089c07CDD", // Mainnet
 };
 
 export {
@@ -40,5 +45,6 @@ export {
     STRATEGY_ADDRESSES,
     YAK_SWAP_CONFIG,
     TOKEN_MILL_CONFIG,
-    APEX_CONFIG,
+    APEX_FACTORY_ADDRESSES,
+    APEX_BURST_FACTORY_ADDRESSES,
 };

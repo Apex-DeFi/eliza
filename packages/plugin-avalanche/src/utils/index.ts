@@ -25,15 +25,15 @@ export const getNetwork = (runtime: IAgentRuntime) => {
         runtime.getSetting("AVALANCHE_NETWORK") ||
         process.env.AVALANCHE_NETWORK;
 
-    if (network === "testnet") {
+    if (network === "fuji") {
         return avalancheFuji;
     }
     return avalanche;
 };
 
-export const getPublicClient = (_runtime: IAgentRuntime) => {
+export const getPublicClient = (runtime: IAgentRuntime) => {
     return createPublicClient({
-        chain: avalancheFuji,
+        chain: getNetwork(runtime),
         transport: http(),
     });
 };
@@ -41,7 +41,7 @@ export const getPublicClient = (_runtime: IAgentRuntime) => {
 export const getWalletClient = (runtime: IAgentRuntime) => {
     return createWalletClient({
         account: getAccount(runtime),
-        chain: avalancheFuji,
+        chain: getNetwork(runtime),
         transport: http(),
     });
 };
