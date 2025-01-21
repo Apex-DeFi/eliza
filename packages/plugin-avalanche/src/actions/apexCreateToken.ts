@@ -87,12 +87,15 @@ export default {
         }
 
         if (!messageText.includes("confirm")) {
+            // callback?.({
+            //     text: `Please confirm these token details:\n${JSON.stringify(
+            //         tokenData,
+            //         null,
+            //         2
+            //     )}\n\nType "confirm" to create the token or "cancel" to clear the data and start over.`,
+            // });
             callback?.({
-                text: `Please confirm these token details:\n${JSON.stringify(
-                    tokenData,
-                    null,
-                    2
-                )}\n\nType "confirm" to create the token or "cancel" to clear the data and start over.`,
+                text: `Type "confirm" to create the token or "cancel" to clear the data and start over.`,
             });
 
             return true;

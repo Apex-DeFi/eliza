@@ -198,10 +198,11 @@ export const createApexBurstToken = async (
     elizaLogger.debug("request", request);
     elizaLogger.debug("result", result);
 
+    let tx = zeroAddress as Address;
     let tokenAddress = zeroAddress as Address;
 
     const walletClient = getWalletClient(runtime);
-    const tx = await walletClient.writeContract(request);
+    tx = await walletClient.writeContract(request);
     elizaLogger.log("Transaction:", tx);
     const receipt = await publicClient.waitForTransactionReceipt({
         hash: tx,
