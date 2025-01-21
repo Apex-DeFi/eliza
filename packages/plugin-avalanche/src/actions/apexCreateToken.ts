@@ -378,36 +378,6 @@ export default {
                 user: "{{agent}}",
                 content: {
                     text: "Token creation cancelled. You can start over whenever you're ready.",
-                    action: "CREATE_BURST_TOKEN",
-                },
-            },
-            {
-                user: "{{user1}}",
-                content: {
-                    text: "Okay let's make a new token called MOON",
-                    action: "CREATE_BURST_TOKEN",
-                },
-            },
-            {
-                user: "{{agent}}",
-                content: {
-                    text: 'Starting fresh! Let me suggest some initial values:\n\nSuggesting these values:\n- Name: "MOON"\n- Symbol: "MOON"\n- Total Supply: 100000000\n\nPlease confirm if you\'d like to use these values.\n\nWe\'ll also need:\n- Description\n- Burst Amount (50-2000 AVAX)\n- DEX Allocations (must total 100%)\n- Reward DEX\n- Creator Address',
-                    action: "CREATE_BURST_TOKEN",
-                },
-            },
-        ],
-        [
-            {
-                user: "{{user1}}",
-                content: {
-                    text: "Actually cancel this, I want to start over",
-                    action: "CREATE_BURST_TOKEN",
-                },
-            },
-            {
-                user: "{{agent}}",
-                content: {
-                    text: "Token creation cancelled. You can start over whenever you're ready.",
                     action: "",
                 },
             },
@@ -431,7 +401,7 @@ export default {
             {
                 user: "{{user1}}",
                 content: {
-                    text: "Actually no cancel this, the allocations aren't right",
+                    text: "cancel this, the allocations aren't right",
                     action: "CREATE_BURST_TOKEN",
                 },
             },

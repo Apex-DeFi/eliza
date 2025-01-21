@@ -16,7 +16,19 @@ export const getAccount = (runtime: IAgentRuntime) => {
     const privateKey =
         runtime.getSetting("AVALANCHE_PRIVATE_KEY") ||
         process.env.AVALANCHE_PRIVATE_KEY;
+
     return privateKeyToAccount(`0x${privateKey.replace("0x", "")}`);
+};
+
+export const getNetwork = (runtime: IAgentRuntime) => {
+    const network =
+        runtime.getSetting("AVALANCHE_NETWORK") ||
+        process.env.AVALANCHE_NETWORK;
+
+    if (network === "testnet") {
+        return avalancheFuji;
+    }
+    return avalanche;
 };
 
 export const getPublicClient = (_runtime: IAgentRuntime) => {

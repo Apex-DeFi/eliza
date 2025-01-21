@@ -6,14 +6,17 @@ CRITICAL VALIDATION RULES:
 MOST IMPORTANT: Build a complete token creation object from ALL conversation context.
 
 1. CONTEXT POLICY:
-   - Extract information from ALL messages in the conversation
+   - Extract information from recent messages in the conversation
    - Maintain previously validated fields from earlier messages
    - Only update fields when explicitly mentioned in newer messages
    - Combine all valid fields into a complete token object
    - Return {} if only seeing questions or hypothetical discussion
+   - If the user cancels the token creation, return {}
+   - If the user wants to start over, return {}
+   - Do not provide any of your own thoughts or opinions on fields unless explicitly asked by the user
 
 2. EXTRACTION RULES:
-   - Look through ALL recent messages for valid token information
+   - Look through recent messages for valid token information
    - Keep existing valid fields unless explicitly updated
    - NEVER extract values from examples or documentation
    - Validate all fields against the rules below
@@ -34,24 +37,24 @@ MOST IMPORTANT: Build a complete token creation object from ALL conversation con
    - MUST be exactly 42 characters (0x + 40 hex characters)
    - MUST start with "0x"
    - MUST only contain hex characters (0-9, a-f, A-F)
-   - EXAMPLE (DO NOT EXTRACT): 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
+   - EXAMPLE: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
    - DO NOT include any address that doesn't meet ALL these criteria
 
 2. Trading Fee:
    - MUST be between 0-5%
-   - Examples (DO NOT EXTRACT): 2.5%, 4.1%, 5%
+   - Examples: 2.5%, 4.1%, 5%
    - DO NOT include if outside this range
 
 3. Max Wallet:
    - MUST be between 0-100%
-   - Examples (DO NOT EXTRACT): 2.5%, 90%, 100%
+   - Examples: 2.5%, 90%, 100%
    - DO NOT include if outside this range
 
 4. Burst Amount:
    - MUST be a multiple of 5
    - Minimum: 50
    - Maximum: 2000
-   - Examples (DO NOT EXTRACT): 50, 55, 60, 65, ... 195, 200
+   - Examples: 50, 55, 60, 65, ... 195, 200
    - May or may not have 'AVAX' or 'Avax' at the end of the number
    - DO NOT include if not meeting these criteria
 
@@ -59,7 +62,7 @@ MOST IMPORTANT: Build a complete token creation object from ALL conversation con
    - ONLY valid DEXs: APEX, JOE, PHARAOH, PANGOLIN
    - Invalid DEXs: UNISWAP, SUSHI, SushiSwap, Uniswap etc. (NEVER EXTRACT THESE)
    - Total allocation MUST equal 100%
-   - Examples (DO NOT EXTRACT): 50% = 5000, 25% = 2500, 10% = 1000, 5% = 500, 2.5% = 250, 1% = 100
+   - Examples: 50% = 5000, 25% = 2500, 10% = 1000, 5% = 500, 2.5% = 250, 1% = 100
    - DO NOT include invalid DEXs or incomplete allocations
 
 6. Reward DEX:
@@ -70,7 +73,7 @@ MOST IMPORTANT: Build a complete token creation object from ALL conversation con
 
 7. totalSupply:
    - MUST be a positive number
-   - Examples (DO NOT EXTRACT): 1000000, 1000000000, 1million, 1billion, 314 million
+   - Examples: 1000000, 1000000000, 1million, 1billion, 314 million
    - Can be null or undefined if not provided
    - DO NOT include if not meeting these criteria
 
@@ -78,13 +81,14 @@ MOST IMPORTANT: Build a complete token creation object from ALL conversation con
     - MUST be 2-10 characters
     - MUST be uppercase
     - NO special characters except underscore
-    - Examples (DO NOT EXTRACT): BTC, ETH, PEPE, DOGE_V2
+    - Examples: BTC, ETH, PEPE, DOGE_V2
+    - DO NOT include if not meeting these criteria
 
 9. Name:
    - MUST be 1-50 characters
    - NO special characters except spaces and underscores
-   - Examples (DO NOT EXTRACT): Bitcoin, Pepe Token, My_Token
-
+   - Examples: Bitcoin, Pepe Token, My_Token
+   - DO NOT include if not meeting these criteria
 Return a JSON markdown block containing ONLY fields that were EXPLICITLY stated AND meet all validation rules:
 
 \`\`\`json

@@ -249,7 +249,6 @@ const getCurveIndex = async (
         return false;
     });
 
-    elizaLogger.log("curveIndex", curveIndex);
     // if no curve is found, return the default curve index (250 Avax - Curve Style 2)
     return curveIndex?.index || 37;
 };

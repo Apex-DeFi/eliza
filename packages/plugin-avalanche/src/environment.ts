@@ -5,6 +5,7 @@ export const avalancheEnvSchema = z.object({
     AVALANCHE_PRIVATE_KEY: z
         .string()
         .min(1, "Avalanche private key is required"),
+    AVALANCHE_NETWORK: z.enum(["testnet", "mainnet"]),
 });
 
 export type AvalancheConfig = z.infer<typeof avalancheEnvSchema>;
@@ -16,6 +17,9 @@ export async function validateAvalancheConfig(
             AVALANCHE_PRIVATE_KEY:
                 runtime.getSetting("AVALANCHE_PRIVATE_KEY") ||
                 process.env.AVALANCHE_PRIVATE_KEY,
+            AVALANCHE_NETWORK:
+                runtime.getSetting("AVALANCHE_NETWORK") ||
+                process.env.AVALANCHE_NETWORK,
         };
 
         return avalancheEnvSchema.parse(config);
