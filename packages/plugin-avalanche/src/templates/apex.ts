@@ -57,6 +57,7 @@ MOST IMPORTANT: Build a complete token creation object from ALL conversation con
 
 5. DEX Allocations:
    - ONLY valid DEXs: APEX, JOE, PHARAOH, PANGOLIN
+   - Invalid DEXs: UNISWAP, SUSHI, SushiSwap, Uniswap etc. (NEVER EXTRACT THESE)
    - Total allocation MUST equal 100%
    - Examples (DO NOT EXTRACT): 50% = 5000, 25% = 2500, 10% = 1000, 5% = 500, 2.5% = 250, 1% = 100
    - DO NOT include invalid DEXs or incomplete allocations
