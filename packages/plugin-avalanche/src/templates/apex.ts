@@ -20,7 +20,7 @@ MOST IMPORTANT: Build a complete token creation object from ALL conversation con
    - Keep existing valid fields unless explicitly updated
    - NEVER extract values from examples or documentation
    - Validate all fields against the rules below
-   - Build complete token object from entire conversation
+   - Build complete token object from recent messages
    - Return full object combining all valid fields found
 
 3. REQUIRED FIELDS:

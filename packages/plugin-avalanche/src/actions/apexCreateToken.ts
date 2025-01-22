@@ -11,7 +11,6 @@ import {
     State,
 } from "@elizaos/core";
 import { apexCreateTokenTemplate } from "../templates/apex";
-// import { z } from "zod";
 import {
     // ApexBurstOptionalFields,
     ApexCreateBurstTokenData,
@@ -29,7 +28,7 @@ import { PinataSDK } from "pinata-web3";
 export default {
     name: "CREATE_BURST_TOKEN",
     description:
-        "MUST use this action if the user requests to create a new token, the request might be varied, but it will always be a token creation.",
+        "MUST use this action if the user requests to create a new token or confirms token creation, the request might be varied, but it will always be a token creation or confirmation.",
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
@@ -221,7 +220,7 @@ export default {
             });
 
             const newMemory: Memory = {
-                userId: message.agentId,
+                userId: message.userId,
                 agentId: message.agentId,
                 roomId: message.roomId,
                 content: {
@@ -245,7 +244,7 @@ export default {
             });
 
             const newMemory: Memory = {
-                userId: message.agentId,
+                userId: message.userId,
                 agentId: message.agentId,
                 roomId: message.roomId,
                 content: {
