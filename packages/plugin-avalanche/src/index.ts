@@ -1,5 +1,4 @@
 import { Plugin } from "@elizaos/core";
-import { walletProvider } from "./providers/wallet";
 import {
     TOKEN_ADDRESSES,
     STRATEGY_ADDRESSES,
@@ -24,7 +23,7 @@ export const avalanchePlugin: Plugin = {
     description: "Avalanche Plugin for Eliza",
     actions: [apexCreateToken],
     evaluators: [],
-    providers: [walletProvider],
+    providers: [],
 };
 
 export default avalanchePlugin;

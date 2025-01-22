@@ -25,7 +25,6 @@ import {
     ApexBurstOptionalFields,
     ApexBurstRequiredFields,
     ApexCreateBurstTokenData,
-    BURST_TOKEN_FIELD_GUIDANCE,
     CurveDetails,
 } from "../types/apex";
 
@@ -74,14 +73,14 @@ export const createApexBurstToken = async (
         burstFactoryAddress
     );
 
-    elizaLogger.info(
+    elizaLogger.debug(
         "[createApexBurstToken] apexBurstTokenData",
         apexBurstTokenData
     );
     // Make sure all required fields are provided
     const missingFields = getMissingRequiredFields(apexBurstTokenData);
 
-    elizaLogger.info("[createApexBurstToken] missingFields", missingFields);
+    elizaLogger.debug("[createApexBurstToken] missingFields", missingFields);
 
     if (missingFields.length > 0) {
         throw new Error(`Missing fields: ${missingFields.join(", ")}`);
@@ -304,52 +303,52 @@ export async function getImagePrompt(
     imagePrompt: string
 ) {
     const CONTENT = imagePrompt;
-    const IMAGE_SYSTEM_PROMPT = `You are an expert in writing prompts for AI art generation. You excel at creating detailed and creative visual descriptions. Incorporating specific elements naturally. Always aim for clear, descriptive language that generates a creative picture. Your output should only contain the description of the image contents, but NOT an instruction like "create an image that..."`;
-    const STYLE = "futuristic with vibrant colors";
+    const IMAGE_SYSTEM_PROMPT = `You are an expert in writing prompts for AI art generation, with a deep understanding of crypto and blockchain themes. You excel at creating detailed and creative visual descriptions that resonate with token branding. Your output should only contain the description of the image contents, but NOT an instruction like "create an image that..."`;
 
-    const IMAGE_PROMPT_INPUT = `You are tasked with generating an image prompt based on a content and a specified style.
-            Your goal is to create a detailed and vivid image prompt that captures the essence of the content while incorporating an appropriate subject based on your analysis of the content.\n\nYou will be given the following inputs:\n<content>\n${CONTENT}\n</content>\n\n<style>\n${STYLE}\n</style>\n\nA good image prompt consists of the following elements:\n\n
+    const IMAGE_PROMPT_INPUT = `You are tasked with generating an image prompt based on the given content. First, analyze the token concept to determine the most fitting artistic style.
 
+Content to analyze:
+<content>
+${CONTENT}
+</content>
+
+A good image prompt consists of these elements:
 1. Main subject
 2. Detailed description
-3. Style
+3. Artistic style (chosen based on token concept)
 4. Lighting
 5. Composition
-6. Quality modifiers
+6. Quality modifiers (colors, mood, etc.)
 
-To generate the image prompt, follow these steps:\n\n1. Analyze the content text carefully, identifying key themes, emotions, and visual elements mentioned or implied.
-\n\n
+Steps to generate the prompt:
+1. Analyze the token concept to determine:
+   - Core theme (meme, utility, finance, etc.)
+   - Target audience
+   - Brand personality
+   - Market positioning
 
-2. Determine the most appropriate main subject by:
-   - Identifying concrete objects or persons mentioned in the content
-   - Analyzing the central theme or message
-   - Considering metaphorical representations of abstract concepts
-   - Selecting a subject that best captures the content's essence
+2. Choose an appropriate artistic style that:
+   - Matches the token's purpose
+   - Appeals to the target audience
+   - Stands out in the crypto space
+   - Creates memorable branding
 
-3. Determine an appropriate environment or setting based on the content's context and your chosen subject.
+3. Create a detailed scene that:
+   - Captures the token's essence
+   - Works well as a token logo
+   - Scales well at different sizes
+   - Remains clear and distinctive
 
-4. Decide on suitable lighting that enhances the mood or atmosphere of the scene.
+Construct your prompt using:
+1. Main subject: Clear focal point
+2. Environment: Supporting elements
+3. Lighting: Enhances mood
+4. Colors: Brand-appropriate palette
+5. Mood: Matches token purpose
+6. Composition: Works as token logo
+7. Style: Chosen based on analysis
 
-5. Choose a color palette that reflects the content's tone and complements the subject.
-
-6. Identify the overall mood or emotion conveyed by the content.
-
-7. Plan a composition that effectively showcases the subject and captures the content's essence.
-
-8. Incorporate the specified style into your description, considering how it affects the overall look and feel of the image.
-
-9. Use concrete nouns and avoid abstract concepts when describing the main subject and elements of the scene.
-
-Construct your image prompt using the following structure:\n\n
-1. Main subject: Describe the primary focus of the image based on your analysis
-2. Environment: Detail the setting or background
-3. Lighting: Specify the type and quality of light in the scene
-4. Colors: Mention the key colors and their relationships
-5. Mood: Convey the overall emotional tone
-6. Composition: Describe how elements are arranged in the frame
-7. Style: Incorporate the given style into the description
-
-Ensure that your prompt is detailed, vivid, and incorporates all the elements mentioned above while staying true to the content and the specified style. LIMIT the image prompt 50 words or less. \n\nWrite a prompt. Only include the prompt and nothing else.`;
+Keep the final prompt under 50 words while maintaining impact and clarity. Write only the prompt, nothing else.`;
 
     return await generateText({
         runtime,
@@ -358,14 +357,6 @@ Ensure that your prompt is detailed, vivid, and incorporates all the elements me
         customSystemPrompt: IMAGE_SYSTEM_PROMPT,
     });
 }
-
-// Simplified guidance to reduce token usage
-export const getMinimalFieldGuidance = (
-    field: keyof typeof BURST_TOKEN_FIELD_GUIDANCE
-) => ({
-    description: BURST_TOKEN_FIELD_GUIDANCE[field].description,
-    valid: BURST_TOKEN_FIELD_GUIDANCE[field].valid.split(".")[0], // Only first example
-});
 
 export const getBurstTokenDataCacheKey = (
     runtime: IAgentRuntime,
