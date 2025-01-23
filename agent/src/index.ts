@@ -55,8 +55,9 @@ import { avalanchePlugin } from "@elizaos/plugin-avalanche";
 //     tradePlugin,
 //     webhookPlugin,
 // } from "@elizaos/plugin-coinbase";
-import { coinmarketcapPlugin } from "@elizaos/plugin-coinmarketcap";
-import { coingeckoPlugin } from "@elizaos/plugin-coingecko";
+// import { coinmarketcapPlugin } from "@elizaos/plugin-coinmarketcap";
+// import { coingeckoPlugin } from "@elizaos/plugin-coingecko";
+import { dexScreenerPlugin } from "@elizaos/plugin-dexscreener";
 // import { confluxPlugin } from "@elizaos/plugin-conflux";
 // import { createCosmosPlugin } from "@elizaos/plugin-cosmos";
 // import { cronosZkEVMPlugin } from "@elizaos/plugin-cronoszkevm";
@@ -772,9 +773,10 @@ export async function createAgent(
             //     ? nftGenerationPlugin
             //     : null,
             // getSecret(character, "ZEROG_PRIVATE_KEY") ? zgPlugin : null,
-            getSecret(character, "COINMARKETCAP_API_KEY")
-                ? coinmarketcapPlugin
-                : null,
+            // getSecret(character, "COINMARKETCAP_API_KEY")
+            //     ? coinmarketcapPlugin
+            //     : null,
+            dexScreenerPlugin,
             // getSecret(character, "COINBASE_COMMERCE_KEY")
             //     ? coinbaseCommercePlugin
             //     : null,
@@ -809,10 +811,10 @@ export async function createAgent(
                 //     ? webhookPlugin
                 //     : null,
                 goatPlugin,
-            getSecret(character, "COINGECKO_API_KEY") ||
-            getSecret(character, "COINGECKO_PRO_API_KEY")
-                ? coingeckoPlugin
-                : null,
+            // getSecret(character, "COINGECKO_API_KEY") ||
+            // getSecret(character, "COINGECKO_PRO_API_KEY")
+            //     ? coingeckoPlugin
+            //     : null,
             getSecret(character, "EVM_PROVIDER_URL") ? goatPlugin : null,
             // getSecret(character, "ABSTRACT_PRIVATE_KEY")
             //     ? abstractPlugin

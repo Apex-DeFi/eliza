@@ -1,6 +1,6 @@
 {
     "name": "Sharky",
-    "plugins": ["@elizaos/plugin-gitbook", "@elizaos/plugin-coinmarketcap"],
+    "plugins": ["@elizaos/plugin-gitbook"],
     "clients": [],
     "modelProvider": "grok",
     "imageModelProvider": "openai",
