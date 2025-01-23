@@ -86,7 +86,7 @@ import { webSearchPlugin } from "@elizaos/plugin-web-search";
 
 // import { giphyPlugin } from "@elizaos/plugin-giphy";
 // import { letzAIPlugin } from "@elizaos/plugin-letzai";
-// import { thirdwebPlugin } from "@elizaos/plugin-thirdweb";
+import { thirdwebPlugin } from "@elizaos/plugin-thirdweb";
 // import { hyperliquidPlugin } from "@elizaos/plugin-hyperliquid";
 // import { zksyncEraPlugin } from "@elizaos/plugin-zksync-era";
 
@@ -837,7 +837,7 @@ export async function createAgent(
             //     : null,
             getSecret(character, "TEE_MARLIN") ? teeMarlinPlugin : null,
             // getSecret(character, "TON_PRIVATE_KEY") ? tonPlugin : null,
-            // getSecret(character, "THIRDWEB_SECRET_KEY") ? thirdwebPlugin : null,
+            getSecret(character, "THIRDWEB_SECRET_KEY") ? thirdwebPlugin : null,
             // getSecret(character, "SUI_PRIVATE_KEY") ? suiPlugin : null,
             getSecret(character, "STORY_PRIVATE_KEY") ? storyPlugin : null,
             // getSecret(character, "FUEL_PRIVATE_KEY") ? fuelPlugin : null,
