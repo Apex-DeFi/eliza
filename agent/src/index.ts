@@ -92,7 +92,7 @@ import { webSearchPlugin } from "@elizaos/plugin-web-search";
 
 import { OpacityAdapter } from "@elizaos/plugin-opacity";
 import { openWeatherPlugin } from "@elizaos/plugin-open-weather";
-import { stargazePlugin } from "@elizaos/plugin-stargaze";
+// import { stargazePlugin } from "@elizaos/plugin-stargaze";
 // import { akashPlugin } from "@elizaos/plugin-akash";
 // import { quaiPlugin } from "@elizaos/plugin-quai";
 import Database from "better-sqlite3";
@@ -849,7 +849,7 @@ export async function createAgent(
             //     ? echoChambersPlugin
             //     : null,
             // getSecret(character, "LETZAI_API_KEY") ? letzAIPlugin : null,
-            getSecret(character, "STARGAZE_ENDPOINT") ? stargazePlugin : null,
+            // getSecret(character, "STARGAZE_ENDPOINT") ? stargazePlugin : null,
             // getSecret(character, "GIPHY_API_KEY") ? giphyPlugin : null,
             // getSecret(character, "GENLAYER_PRIVATE_KEY")
             //     ? genLayerPlugin
