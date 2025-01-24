@@ -57,7 +57,7 @@ import { avalanchePlugin } from "@elizaos/plugin-avalanche";
 // } from "@elizaos/plugin-coinbase";
 // import { coinmarketcapPlugin } from "@elizaos/plugin-coinmarketcap";
 // import { coingeckoPlugin } from "@elizaos/plugin-coingecko";
-import { dexScreenerPlugin } from "@elizaos/plugin-dexscreener";
+// import { dexScreenerPlugin } from "@elizaos/plugin-dexscreener";
 // import { confluxPlugin } from "@elizaos/plugin-conflux";
 // import { createCosmosPlugin } from "@elizaos/plugin-cosmos";
 // import { cronosZkEVMPlugin } from "@elizaos/plugin-cronoszkevm";
@@ -776,7 +776,7 @@ export async function createAgent(
             // getSecret(character, "COINMARKETCAP_API_KEY")
             //     ? coinmarketcapPlugin
             //     : null,
-            dexScreenerPlugin,
+            // dexScreenerPlugin,
             // getSecret(character, "COINBASE_COMMERCE_KEY")
             //     ? coinbaseCommercePlugin
             //     : null,

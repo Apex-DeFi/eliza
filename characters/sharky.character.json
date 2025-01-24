@@ -8,7 +8,10 @@
     "settings": {
         "secrets": {},
         "telegram": {
-            "shouldOnlyRespondToMentions": true
+            "shouldOnlyRespondToMentions": "true"
+        },
+        "discord": {
+            "shouldOnlyRespondToMentions": "true"
         },
         "gitbook": {
             "keywords": {
