@@ -2,7 +2,7 @@
     "name": "Sharky",
     "plugins": ["@elizaos/plugin-gitbook"],
     "clients": [],
-    "modelProvider": "grok",
+    "modelProvider": "openrouter",
     "imageModelProvider": "openai",
     "imageVisionModelProvider": "openai",
     "settings": {
